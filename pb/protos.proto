@@ -1,0 +1,33 @@
+syntax = "proto3";
+package pb;
+
+enum ChannelType{
+    Empty = 0;
+    Subscribe = 1;
+    P2P = 2;
+}
+
+message CreateChannelMsg{
+    string Name = 1;
+    ChannelType Type = 2;
+}
+
+message PublishMsg{
+    string Name = 1;
+    bytes Content = 2;
+}
+
+message NotifyMsg{
+    string Name = 1;
+    bytes Content = 2;
+}
+
+message SubscribeMsg{
+    string Name = 1;
+    int64 Subscriber = 2;
+}
+
+message UnsubscribeMsg{
+    string Name = 1;
+    int64 Subscriber = 2;
+}

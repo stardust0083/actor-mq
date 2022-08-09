@@ -1,0 +1,1 @@
+protoc --gogoslick_out=plugins=grpc:. --proto_path=. protos.proto

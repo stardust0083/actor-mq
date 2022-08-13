@@ -4,11 +4,6 @@ import (
 	"fmt"
 	"log"
 
-	"actor-mq/messages"
-	"actor-mq/utils"
-
-	"github.com/asynkron/protoactor-go/actor"
-	"github.com/asynkron/protoactor-go/remote"
 )
 
 const host = "localhost"
@@ -16,15 +11,15 @@ const port = 8080
 
 func init() {
 	fmt.Printf("[INFO] Broker starting at %s:%d\n", host, port)
-	remote.Start(fmt.Sprintf("%s:%d", host, port))
+	// remote.Start(fmt.Sprintf("%s:%d", host, port))
 }
 
 type ChannelManager struct {
-	channels map[string]*actor.PID
+	// channels map[string]*actor.PID
 }
 
 func NewChannelManager() *ChannelManager {
-	return &ChannelManager{make(map[string]*actor.PID)}
+	// return &ChannelManager{make(map[string]*actor.PID)}
 }
 
 func (state *ChannelManager) Receive(context actor.Context) {

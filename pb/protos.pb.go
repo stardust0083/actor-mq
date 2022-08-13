@@ -5,8 +5,12 @@ package pb
 
 import (
 	bytes "bytes"
+	context "context"
 	fmt "fmt"
 	proto "github.com/gogo/protobuf/proto"
+	grpc "google.golang.org/grpc"
+	codes "google.golang.org/grpc/codes"
+	status "google.golang.org/grpc/status"
 	io "io"
 	math "math"
 	math_bits "math/bits"
@@ -152,57 +156,6 @@ func (m *PublishMsg) GetContent() []byte {
 	return nil
 }
 
-type NotifyMsg struct {
-	Name    string `protobuf:"bytes,1,opt,name=Name,proto3" json:"Name,omitempty"`
-	Content []byte `protobuf:"bytes,2,opt,name=Content,proto3" json:"Content,omitempty"`
-}
-
-func (m *NotifyMsg) Reset()      { *m = NotifyMsg{} }
-func (*NotifyMsg) ProtoMessage() {}
-func (*NotifyMsg) Descriptor() ([]byte, []int) {
-	return fileDescriptor_5da3cbeb884d181c, []int{2}
-}
-func (m *NotifyMsg) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *NotifyMsg) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_NotifyMsg.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *NotifyMsg) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_NotifyMsg.Merge(m, src)
-}
-func (m *NotifyMsg) XXX_Size() int {
-	return m.Size()
-}
-func (m *NotifyMsg) XXX_DiscardUnknown() {
-	xxx_messageInfo_NotifyMsg.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_NotifyMsg proto.InternalMessageInfo
-
-func (m *NotifyMsg) GetName() string {
-	if m != nil {
-		return m.Name
-	}
-	return ""
-}
-
-func (m *NotifyMsg) GetContent() []byte {
-	if m != nil {
-		return m.Content
-	}
-	return nil
-}
-
 type SubscribeMsg struct {
 	Name       string `protobuf:"bytes,1,opt,name=Name,proto3" json:"Name,omitempty"`
 	Subscriber int64  `protobuf:"varint,2,opt,name=Subscriber,proto3" json:"Subscriber,omitempty"`
@@ -211,7 +164,7 @@ type SubscribeMsg struct {
 func (m *SubscribeMsg) Reset()      { *m = SubscribeMsg{} }
 func (*SubscribeMsg) ProtoMessage() {}
 func (*SubscribeMsg) Descriptor() ([]byte, []int) {
-	return fileDescriptor_5da3cbeb884d181c, []int{3}
+	return fileDescriptor_5da3cbeb884d181c, []int{2}
 }
 func (m *SubscribeMsg) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -254,22 +207,21 @@ func (m *SubscribeMsg) GetSubscriber() int64 {
 	return 0
 }
 
-type UnsubscribeMsg struct {
-	Name       string `protobuf:"bytes,1,opt,name=Name,proto3" json:"Name,omitempty"`
-	Subscriber int64  `protobuf:"varint,2,opt,name=Subscriber,proto3" json:"Subscriber,omitempty"`
+type ControlMsg struct {
+	Content string `protobuf:"bytes,1,opt,name=Content,proto3" json:"Content,omitempty"`
 }
 
-func (m *UnsubscribeMsg) Reset()      { *m = UnsubscribeMsg{} }
-func (*UnsubscribeMsg) ProtoMessage() {}
-func (*UnsubscribeMsg) Descriptor() ([]byte, []int) {
-	return fileDescriptor_5da3cbeb884d181c, []int{4}
+func (m *ControlMsg) Reset()      { *m = ControlMsg{} }
+func (*ControlMsg) ProtoMessage() {}
+func (*ControlMsg) Descriptor() ([]byte, []int) {
+	return fileDescriptor_5da3cbeb884d181c, []int{3}
 }
-func (m *UnsubscribeMsg) XXX_Unmarshal(b []byte) error {
+func (m *ControlMsg) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *UnsubscribeMsg) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *ControlMsg) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_UnsubscribeMsg.Marshal(b, m, deterministic)
+		return xxx_messageInfo_ControlMsg.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -279,63 +231,59 @@ func (m *UnsubscribeMsg) XXX_Marshal(b []byte, deterministic bool) ([]byte, erro
 		return b[:n], nil
 	}
 }
-func (m *UnsubscribeMsg) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_UnsubscribeMsg.Merge(m, src)
+func (m *ControlMsg) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ControlMsg.Merge(m, src)
 }
-func (m *UnsubscribeMsg) XXX_Size() int {
+func (m *ControlMsg) XXX_Size() int {
 	return m.Size()
 }
-func (m *UnsubscribeMsg) XXX_DiscardUnknown() {
-	xxx_messageInfo_UnsubscribeMsg.DiscardUnknown(m)
+func (m *ControlMsg) XXX_DiscardUnknown() {
+	xxx_messageInfo_ControlMsg.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_UnsubscribeMsg proto.InternalMessageInfo
+var xxx_messageInfo_ControlMsg proto.InternalMessageInfo
 
-func (m *UnsubscribeMsg) GetName() string {
+func (m *ControlMsg) GetContent() string {
 	if m != nil {
-		return m.Name
+		return m.Content
 	}
 	return ""
-}
-
-func (m *UnsubscribeMsg) GetSubscriber() int64 {
-	if m != nil {
-		return m.Subscriber
-	}
-	return 0
 }
 
 func init() {
 	proto.RegisterEnum("pb.ChannelType", ChannelType_name, ChannelType_value)
 	proto.RegisterType((*CreateChannelMsg)(nil), "pb.CreateChannelMsg")
 	proto.RegisterType((*PublishMsg)(nil), "pb.PublishMsg")
-	proto.RegisterType((*NotifyMsg)(nil), "pb.NotifyMsg")
 	proto.RegisterType((*SubscribeMsg)(nil), "pb.SubscribeMsg")
-	proto.RegisterType((*UnsubscribeMsg)(nil), "pb.UnsubscribeMsg")
+	proto.RegisterType((*ControlMsg)(nil), "pb.ControlMsg")
 }
 
 func init() { proto.RegisterFile("protos.proto", fileDescriptor_5da3cbeb884d181c) }
 
 var fileDescriptor_5da3cbeb884d181c = []byte{
-	// 277 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0xe2, 0x29, 0x28, 0xca, 0x2f,
-	0xc9, 0x2f, 0xd6, 0x03, 0x53, 0x42, 0x4c, 0x05, 0x49, 0x4a, 0xde, 0x5c, 0x02, 0xce, 0x45, 0xa9,
-	0x89, 0x25, 0xa9, 0xce, 0x19, 0x89, 0x79, 0x79, 0xa9, 0x39, 0xbe, 0xc5, 0xe9, 0x42, 0x42, 0x5c,
-	0x2c, 0x7e, 0x89, 0xb9, 0xa9, 0x12, 0x8c, 0x0a, 0x8c, 0x1a, 0x9c, 0x41, 0x60, 0xb6, 0x90, 0x32,
-	0x17, 0x4b, 0x48, 0x65, 0x41, 0xaa, 0x04, 0x93, 0x02, 0xa3, 0x06, 0x9f, 0x11, 0xbf, 0x5e, 0x41,
-	0x92, 0x1e, 0x54, 0x07, 0x48, 0x38, 0x08, 0x2c, 0xa9, 0x64, 0xc5, 0xc5, 0x15, 0x50, 0x9a, 0x94,
-	0x93, 0x59, 0x9c, 0x81, 0xcb, 0x18, 0x09, 0x2e, 0x76, 0xe7, 0xfc, 0xbc, 0x92, 0xd4, 0xbc, 0x12,
-	0xb0, 0x49, 0x3c, 0x41, 0x30, 0xae, 0x92, 0x25, 0x17, 0xa7, 0x5f, 0x7e, 0x49, 0x66, 0x5a, 0x25,
-	0xe9, 0x5a, 0x9d, 0xb8, 0x78, 0x82, 0x4b, 0x93, 0x8a, 0x93, 0x8b, 0x32, 0x93, 0x52, 0x71, 0xe9,
-	0x96, 0xe3, 0xe2, 0x82, 0xab, 0x29, 0x02, 0x1b, 0xc0, 0x1c, 0x84, 0x24, 0xa2, 0xe4, 0xc2, 0xc5,
-	0x17, 0x9a, 0x57, 0x4c, 0xa1, 0x29, 0x5a, 0x06, 0x5c, 0xdc, 0x48, 0xa1, 0x22, 0xc4, 0xc9, 0xc5,
-	0xea, 0x9a, 0x5b, 0x50, 0x52, 0x29, 0xc0, 0x20, 0xc4, 0xcb, 0xc5, 0x09, 0x57, 0x27, 0xc0, 0x28,
-	0xc4, 0xce, 0xc5, 0x1c, 0x60, 0x14, 0x20, 0xc0, 0xe4, 0x64, 0x72, 0xe1, 0xa1, 0x1c, 0xc3, 0x8d,
-	0x87, 0x72, 0x0c, 0x1f, 0x1e, 0xca, 0x31, 0x36, 0x3c, 0x92, 0x63, 0x5c, 0xf1, 0x48, 0x8e, 0xf1,
-	0xc4, 0x23, 0x39, 0xc6, 0x0b, 0x8f, 0xe4, 0x18, 0x1f, 0x3c, 0x92, 0x63, 0x7c, 0xf1, 0x48, 0x8e,
-	0xe1, 0xc3, 0x23, 0x39, 0xc6, 0x09, 0x8f, 0xe5, 0x18, 0x2e, 0x3c, 0x96, 0x63, 0xb8, 0xf1, 0x58,
-	0x8e, 0x21, 0x89, 0x0d, 0x1c, 0x81, 0xc6, 0x80, 0x00, 0x00, 0x00, 0xff, 0xff, 0x59, 0xf3, 0xc9,
-	0x5a, 0xd0, 0x01, 0x00, 0x00,
+	// 344 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x74, 0x92, 0xc1, 0x4e, 0xf2, 0x40,
+	0x10, 0x80, 0x77, 0x81, 0xff, 0x27, 0x8c, 0x80, 0xcd, 0xc6, 0x03, 0xf1, 0x30, 0x21, 0x35, 0x2a,
+	0xd1, 0x84, 0x98, 0x6a, 0x8c, 0xf1, 0x62, 0x02, 0xf1, 0x64, 0x30, 0x4d, 0xf1, 0x05, 0x58, 0xb2,
+	0x01, 0x12, 0x68, 0x9b, 0xdd, 0x62, 0xc2, 0xcd, 0x47, 0xf0, 0x31, 0x7c, 0x14, 0x8f, 0x1c, 0x39,
+	0xca, 0x72, 0xf1, 0xc8, 0x23, 0x98, 0x6e, 0x85, 0x36, 0x18, 0x4e, 0xed, 0x6c, 0xe7, 0xfb, 0x66,
+	0xa6, 0xb3, 0x50, 0x0e, 0x65, 0x10, 0x05, 0xaa, 0x69, 0x1e, 0x2c, 0x17, 0x72, 0xfb, 0x09, 0xac,
+	0xb6, 0x14, 0xbd, 0x48, 0xb4, 0x87, 0x3d, 0xdf, 0x17, 0xe3, 0x8e, 0x1a, 0x30, 0x06, 0x85, 0xe7,
+	0xde, 0x44, 0xd4, 0x68, 0x9d, 0x36, 0x4a, 0x9e, 0x79, 0x67, 0x27, 0x50, 0x78, 0x99, 0x85, 0xa2,
+	0x96, 0xab, 0xd3, 0x46, 0xd5, 0x39, 0x6c, 0x86, 0xbc, 0xf9, 0x4b, 0xc4, 0xc7, 0x9e, 0xf9, 0x68,
+	0xdf, 0x03, 0xb8, 0x53, 0x3e, 0x1e, 0xa9, 0xe1, 0x3e, 0x4d, 0x0d, 0x8a, 0xed, 0xc0, 0x8f, 0x84,
+	0x1f, 0x19, 0x53, 0xd9, 0xdb, 0x84, 0x76, 0x0b, 0xca, 0xdd, 0x29, 0x57, 0x7d, 0x39, 0xe2, 0x62,
+	0x1f, 0x8d, 0x00, 0xdb, 0x1c, 0x69, 0x04, 0x79, 0x2f, 0x73, 0x62, 0x9f, 0x01, 0xc4, 0x3a, 0x19,
+	0x98, 0x31, 0x32, 0xb5, 0x12, 0xc9, 0x26, 0xbc, 0xb8, 0x82, 0x83, 0x4c, 0xf3, 0xac, 0x04, 0xff,
+	0x1e, 0x27, 0x61, 0x34, 0xb3, 0x08, 0xab, 0x40, 0x69, 0xeb, 0xb3, 0x28, 0x2b, 0x42, 0xde, 0x75,
+	0x5c, 0x2b, 0xe7, 0xdc, 0x42, 0xa5, 0xa3, 0x06, 0xee, 0x94, 0x77, 0x85, 0x7c, 0x1d, 0xf5, 0x05,
+	0x3b, 0x85, 0x7c, 0x5c, 0xa3, 0x1a, 0xff, 0x88, 0x74, 0xe6, 0x63, 0x13, 0xa7, 0x3d, 0x38, 0x77,
+	0x86, 0xeb, 0xa6, 0xdc, 0x79, 0xc2, 0x59, 0x71, 0x5e, 0x76, 0xde, 0x3f, 0xe4, 0x03, 0x58, 0x1d,
+	0x35, 0x48, 0x76, 0xb3, 0x81, 0x2f, 0x13, 0xf8, 0xc8, 0xa4, 0xee, 0x6c, 0x6d, 0x57, 0xd0, 0xba,
+	0x99, 0x2f, 0x91, 0x2c, 0x96, 0x48, 0xd6, 0x4b, 0xa4, 0x6f, 0x1a, 0xe9, 0x87, 0x46, 0xfa, 0xa9,
+	0x91, 0xce, 0x35, 0xd2, 0x2f, 0x8d, 0xf4, 0x5b, 0x23, 0x59, 0x6b, 0xa4, 0xef, 0x2b, 0x24, 0xf3,
+	0x15, 0x92, 0xc5, 0x0a, 0x09, 0xff, 0x6f, 0xae, 0xc6, 0xf5, 0x4f, 0x00, 0x00, 0x00, 0xff, 0xff,
+	0x23, 0x2f, 0xd1, 0x9c, 0x2a, 0x02, 0x00, 0x00,
 }
 
 func (x ChannelType) String() string {
@@ -399,33 +347,6 @@ func (this *PublishMsg) Equal(that interface{}) bool {
 	}
 	return true
 }
-func (this *NotifyMsg) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*NotifyMsg)
-	if !ok {
-		that2, ok := that.(NotifyMsg)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if this.Name != that1.Name {
-		return false
-	}
-	if !bytes.Equal(this.Content, that1.Content) {
-		return false
-	}
-	return true
-}
 func (this *SubscribeMsg) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
@@ -453,14 +374,14 @@ func (this *SubscribeMsg) Equal(that interface{}) bool {
 	}
 	return true
 }
-func (this *UnsubscribeMsg) Equal(that interface{}) bool {
+func (this *ControlMsg) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
 	}
 
-	that1, ok := that.(*UnsubscribeMsg)
+	that1, ok := that.(*ControlMsg)
 	if !ok {
-		that2, ok := that.(UnsubscribeMsg)
+		that2, ok := that.(ControlMsg)
 		if ok {
 			that1 = &that2
 		} else {
@@ -472,10 +393,7 @@ func (this *UnsubscribeMsg) Equal(that interface{}) bool {
 	} else if this == nil {
 		return false
 	}
-	if this.Name != that1.Name {
-		return false
-	}
-	if this.Subscriber != that1.Subscriber {
+	if this.Content != that1.Content {
 		return false
 	}
 	return true
@@ -502,17 +420,6 @@ func (this *PublishMsg) GoString() string {
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
-func (this *NotifyMsg) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := make([]string, 0, 6)
-	s = append(s, "&pb.NotifyMsg{")
-	s = append(s, "Name: "+fmt.Sprintf("%#v", this.Name)+",\n")
-	s = append(s, "Content: "+fmt.Sprintf("%#v", this.Content)+",\n")
-	s = append(s, "}")
-	return strings.Join(s, "")
-}
 func (this *SubscribeMsg) GoString() string {
 	if this == nil {
 		return "nil"
@@ -524,14 +431,13 @@ func (this *SubscribeMsg) GoString() string {
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
-func (this *UnsubscribeMsg) GoString() string {
+func (this *ControlMsg) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 6)
-	s = append(s, "&pb.UnsubscribeMsg{")
-	s = append(s, "Name: "+fmt.Sprintf("%#v", this.Name)+",\n")
-	s = append(s, "Subscriber: "+fmt.Sprintf("%#v", this.Subscriber)+",\n")
+	s := make([]string, 0, 5)
+	s = append(s, "&pb.ControlMsg{")
+	s = append(s, "Content: "+fmt.Sprintf("%#v", this.Content)+",\n")
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
@@ -543,6 +449,231 @@ func valueToGoStringProtos(v interface{}, typ string) string {
 	pv := reflect.Indirect(rv).Interface()
 	return fmt.Sprintf("func(v %v) *%v { return &v } ( %#v )", typ, typ, pv)
 }
+
+// Reference imports to suppress errors if they are not otherwise used.
+var _ context.Context
+var _ grpc.ClientConn
+
+// This is a compile-time assertion to ensure that this generated file
+// is compatible with the grpc package it is being compiled against.
+const _ = grpc.SupportPackageIsVersion4
+
+// MsgPubServiceClient is the client API for MsgPubService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
+type MsgPubServiceClient interface {
+	Msg(ctx context.Context, in *PublishMsg, opts ...grpc.CallOption) (*ControlMsg, error)
+}
+
+type msgPubServiceClient struct {
+	cc *grpc.ClientConn
+}
+
+func NewMsgPubServiceClient(cc *grpc.ClientConn) MsgPubServiceClient {
+	return &msgPubServiceClient{cc}
+}
+
+func (c *msgPubServiceClient) Msg(ctx context.Context, in *PublishMsg, opts ...grpc.CallOption) (*ControlMsg, error) {
+	out := new(ControlMsg)
+	err := c.cc.Invoke(ctx, "/pb.MsgPubService/Msg", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// MsgPubServiceServer is the server API for MsgPubService service.
+type MsgPubServiceServer interface {
+	Msg(context.Context, *PublishMsg) (*ControlMsg, error)
+}
+
+// UnimplementedMsgPubServiceServer can be embedded to have forward compatible implementations.
+type UnimplementedMsgPubServiceServer struct {
+}
+
+func (*UnimplementedMsgPubServiceServer) Msg(ctx context.Context, req *PublishMsg) (*ControlMsg, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Msg not implemented")
+}
+
+func RegisterMsgPubServiceServer(s *grpc.Server, srv MsgPubServiceServer) {
+	s.RegisterService(&_MsgPubService_serviceDesc, srv)
+}
+
+func _MsgPubService_Msg_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PublishMsg)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgPubServiceServer).Msg(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pb.MsgPubService/Msg",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgPubServiceServer).Msg(ctx, req.(*PublishMsg))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+var _MsgPubService_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "pb.MsgPubService",
+	HandlerType: (*MsgPubServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "Msg",
+			Handler:    _MsgPubService_Msg_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "protos.proto",
+}
+
+// MsgSubServiceClient is the client API for MsgSubService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
+type MsgSubServiceClient interface {
+	Msg(ctx context.Context, in *SubscribeMsg, opts ...grpc.CallOption) (*ControlMsg, error)
+}
+
+type msgSubServiceClient struct {
+	cc *grpc.ClientConn
+}
+
+func NewMsgSubServiceClient(cc *grpc.ClientConn) MsgSubServiceClient {
+	return &msgSubServiceClient{cc}
+}
+
+func (c *msgSubServiceClient) Msg(ctx context.Context, in *SubscribeMsg, opts ...grpc.CallOption) (*ControlMsg, error) {
+	out := new(ControlMsg)
+	err := c.cc.Invoke(ctx, "/pb.MsgSubService/Msg", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// MsgSubServiceServer is the server API for MsgSubService service.
+type MsgSubServiceServer interface {
+	Msg(context.Context, *SubscribeMsg) (*ControlMsg, error)
+}
+
+// UnimplementedMsgSubServiceServer can be embedded to have forward compatible implementations.
+type UnimplementedMsgSubServiceServer struct {
+}
+
+func (*UnimplementedMsgSubServiceServer) Msg(ctx context.Context, req *SubscribeMsg) (*ControlMsg, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Msg not implemented")
+}
+
+func RegisterMsgSubServiceServer(s *grpc.Server, srv MsgSubServiceServer) {
+	s.RegisterService(&_MsgSubService_serviceDesc, srv)
+}
+
+func _MsgSubService_Msg_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SubscribeMsg)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgSubServiceServer).Msg(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pb.MsgSubService/Msg",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgSubServiceServer).Msg(ctx, req.(*SubscribeMsg))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+var _MsgSubService_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "pb.MsgSubService",
+	HandlerType: (*MsgSubServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "Msg",
+			Handler:    _MsgSubService_Msg_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "protos.proto",
+}
+
+// MsgCreateServiceClient is the client API for MsgCreateService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
+type MsgCreateServiceClient interface {
+	Msg(ctx context.Context, in *CreateChannelMsg, opts ...grpc.CallOption) (*ControlMsg, error)
+}
+
+type msgCreateServiceClient struct {
+	cc *grpc.ClientConn
+}
+
+func NewMsgCreateServiceClient(cc *grpc.ClientConn) MsgCreateServiceClient {
+	return &msgCreateServiceClient{cc}
+}
+
+func (c *msgCreateServiceClient) Msg(ctx context.Context, in *CreateChannelMsg, opts ...grpc.CallOption) (*ControlMsg, error) {
+	out := new(ControlMsg)
+	err := c.cc.Invoke(ctx, "/pb.MsgCreateService/Msg", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// MsgCreateServiceServer is the server API for MsgCreateService service.
+type MsgCreateServiceServer interface {
+	Msg(context.Context, *CreateChannelMsg) (*ControlMsg, error)
+}
+
+// UnimplementedMsgCreateServiceServer can be embedded to have forward compatible implementations.
+type UnimplementedMsgCreateServiceServer struct {
+}
+
+func (*UnimplementedMsgCreateServiceServer) Msg(ctx context.Context, req *CreateChannelMsg) (*ControlMsg, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Msg not implemented")
+}
+
+func RegisterMsgCreateServiceServer(s *grpc.Server, srv MsgCreateServiceServer) {
+	s.RegisterService(&_MsgCreateService_serviceDesc, srv)
+}
+
+func _MsgCreateService_Msg_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateChannelMsg)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgCreateServiceServer).Msg(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pb.MsgCreateService/Msg",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgCreateServiceServer).Msg(ctx, req.(*CreateChannelMsg))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+var _MsgCreateService_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "pb.MsgCreateService",
+	HandlerType: (*MsgCreateServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "Msg",
+			Handler:    _MsgCreateService_Msg_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "protos.proto",
+}
+
 func (m *CreateChannelMsg) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -615,43 +746,6 @@ func (m *PublishMsg) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *NotifyMsg) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *NotifyMsg) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *NotifyMsg) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.Content) > 0 {
-		i -= len(m.Content)
-		copy(dAtA[i:], m.Content)
-		i = encodeVarintProtos(dAtA, i, uint64(len(m.Content)))
-		i--
-		dAtA[i] = 0x12
-	}
-	if len(m.Name) > 0 {
-		i -= len(m.Name)
-		copy(dAtA[i:], m.Name)
-		i = encodeVarintProtos(dAtA, i, uint64(len(m.Name)))
-		i--
-		dAtA[i] = 0xa
-	}
-	return len(dAtA) - i, nil
-}
-
 func (m *SubscribeMsg) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -687,7 +781,7 @@ func (m *SubscribeMsg) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *UnsubscribeMsg) Marshal() (dAtA []byte, err error) {
+func (m *ControlMsg) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -697,25 +791,20 @@ func (m *UnsubscribeMsg) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *UnsubscribeMsg) MarshalTo(dAtA []byte) (int, error) {
+func (m *ControlMsg) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *UnsubscribeMsg) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *ControlMsg) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
-	if m.Subscriber != 0 {
-		i = encodeVarintProtos(dAtA, i, uint64(m.Subscriber))
-		i--
-		dAtA[i] = 0x10
-	}
-	if len(m.Name) > 0 {
-		i -= len(m.Name)
-		copy(dAtA[i:], m.Name)
-		i = encodeVarintProtos(dAtA, i, uint64(len(m.Name)))
+	if len(m.Content) > 0 {
+		i -= len(m.Content)
+		copy(dAtA[i:], m.Content)
+		i = encodeVarintProtos(dAtA, i, uint64(len(m.Content)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -766,23 +855,6 @@ func (m *PublishMsg) Size() (n int) {
 	return n
 }
 
-func (m *NotifyMsg) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	l = len(m.Name)
-	if l > 0 {
-		n += 1 + l + sovProtos(uint64(l))
-	}
-	l = len(m.Content)
-	if l > 0 {
-		n += 1 + l + sovProtos(uint64(l))
-	}
-	return n
-}
-
 func (m *SubscribeMsg) Size() (n int) {
 	if m == nil {
 		return 0
@@ -799,18 +871,15 @@ func (m *SubscribeMsg) Size() (n int) {
 	return n
 }
 
-func (m *UnsubscribeMsg) Size() (n int) {
+func (m *ControlMsg) Size() (n int) {
 	if m == nil {
 		return 0
 	}
 	var l int
 	_ = l
-	l = len(m.Name)
+	l = len(m.Content)
 	if l > 0 {
 		n += 1 + l + sovProtos(uint64(l))
-	}
-	if m.Subscriber != 0 {
-		n += 1 + sovProtos(uint64(m.Subscriber))
 	}
 	return n
 }
@@ -843,17 +912,6 @@ func (this *PublishMsg) String() string {
 	}, "")
 	return s
 }
-func (this *NotifyMsg) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&NotifyMsg{`,
-		`Name:` + fmt.Sprintf("%v", this.Name) + `,`,
-		`Content:` + fmt.Sprintf("%v", this.Content) + `,`,
-		`}`,
-	}, "")
-	return s
-}
 func (this *SubscribeMsg) String() string {
 	if this == nil {
 		return "nil"
@@ -865,13 +923,12 @@ func (this *SubscribeMsg) String() string {
 	}, "")
 	return s
 }
-func (this *UnsubscribeMsg) String() string {
+func (this *ControlMsg) String() string {
 	if this == nil {
 		return "nil"
 	}
-	s := strings.Join([]string{`&UnsubscribeMsg{`,
-		`Name:` + fmt.Sprintf("%v", this.Name) + `,`,
-		`Subscriber:` + fmt.Sprintf("%v", this.Subscriber) + `,`,
+	s := strings.Join([]string{`&ControlMsg{`,
+		`Content:` + fmt.Sprintf("%v", this.Content) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -1101,122 +1158,6 @@ func (m *PublishMsg) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *NotifyMsg) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowProtos
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: NotifyMsg: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: NotifyMsg: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Name", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowProtos
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthProtos
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthProtos
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Name = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 2:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Content", wireType)
-			}
-			var byteLen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowProtos
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				byteLen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if byteLen < 0 {
-				return ErrInvalidLengthProtos
-			}
-			postIndex := iNdEx + byteLen
-			if postIndex < 0 {
-				return ErrInvalidLengthProtos
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Content = append(m.Content[:0], dAtA[iNdEx:postIndex]...)
-			if m.Content == nil {
-				m.Content = []byte{}
-			}
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipProtos(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthProtos
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
 func (m *SubscribeMsg) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
@@ -1318,7 +1259,7 @@ func (m *SubscribeMsg) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *UnsubscribeMsg) Unmarshal(dAtA []byte) error {
+func (m *ControlMsg) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -1341,15 +1282,15 @@ func (m *UnsubscribeMsg) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: UnsubscribeMsg: wiretype end group for non-group")
+			return fmt.Errorf("proto: ControlMsg: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: UnsubscribeMsg: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: ControlMsg: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Name", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Content", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -1377,27 +1318,8 @@ func (m *UnsubscribeMsg) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Name = string(dAtA[iNdEx:postIndex])
+			m.Content = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
-		case 2:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Subscriber", wireType)
-			}
-			m.Subscriber = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowProtos
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.Subscriber |= int64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
 		default:
 			iNdEx = preIndex
 			skippy, err := skipProtos(dAtA[iNdEx:])

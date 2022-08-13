@@ -32,7 +32,7 @@ func main() {
 	file := openFile(fmt.Sprintf("responseTime%d", NumberRequests))
 	defer file.Close()
 
-	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
+	conn, err := amqp.Dial("amqp://guest:guest@localhost:15672/")
 	failOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
 

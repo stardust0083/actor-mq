@@ -1,0 +1,18 @@
+syntax = "proto3";
+package actor;
+option go_package = "../actor";
+
+message PID {
+  string Host = 1;
+  string Id = 2;
+}
+
+//user messages
+enum States{
+    Empty=0;
+    Restarting =1;
+    Stoppint=2;
+    Stopped=3;
+    PoisonPill=4;
+    Started=5;
+}

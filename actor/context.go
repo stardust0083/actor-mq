@@ -1,5 +1,7 @@
 package actor
 
+import "fmt"
+
 type Context interface {
 	Watch(*PID)
 	UnWatch(*PID)
@@ -61,14 +63,13 @@ func (cell *ActorCell) Parent() *PID {
 	return cell.parent
 }
 
-
 func NewActorCell(props Properties, parent *PID) *ActorCell {
 
 	cell := ActorCell{
 		parent:     parent,
 		props:      props,
 		supervisor: props.Supervisor(),
-		behaviour:   make([]interface{}, 0),
+		behaviour:  make([]interface{}, 0),
 		children:   make(map[interface{}]struct{}),
 		watchers:   make(map[interface{}]struct{}),
 		watching:   make(map[interface{}]struct{}),
@@ -92,9 +93,9 @@ func (cell *ActorCell) invokeSystemMessage(message SystemMessage) {
 	case *otherStopped:
 		cell.handleOtherStopped(msg)
 	case *watch:
-		cell.watchers.Add(msg.Watcher)
+		cell.watchers[msg.Watcher] = struct{}{}
 	case *unwatch:
-		cell.watchers.Remove(msg.Watcher)
+		cell.watchers[msg.Watcher] = struct{}{}
 	case *failure:
 		cell.handleFailure(msg)
 	case *restart:
@@ -106,16 +107,16 @@ func (cell *ActorCell) invokeSystemMessage(message SystemMessage) {
 
 func (cell *ActorCell) handleStop(msg *stop) {
 	cell.stopping = true
-	cell.invokeUserMessage(Stopping{})
-	for _, child := range cell.children.Values() {
+	cell.invokeUserMessage(States_Stopping)
+	for child := range cell.children {
 		child.(*PID).Stop()
 	}
 	cell.tryRestartOrTerminate()
 }
 
 func (cell *ActorCell) handleOtherStopped(msg *otherStopped) {
-	cell.children.Remove(msg.Who)
-	cell.watching.Remove(msg.Who)
+	delete(cell.children, msg.Who)
+	delete(cell.watching, msg.Who)
 	cell.tryRestartOrTerminate()
 }
 
@@ -124,30 +125,30 @@ func (cell *ActorCell) handleFailure(msg *failure) {
 	switch directive {
 	case ResumeDirective:
 		//resume the fialing child
-		msg.Who.sendSystemMessage(&resume{})
+		msg.Who.TellSystem(&resume{})
 	case RestartDirective:
 		//restart the failing child
-		msg.Who.sendSystemMessage(&restart{})
+		msg.Who.TellSystem(&restart{})
 	case StopDirective:
 		//stop the failing child
 		msg.Who.Stop()
 	case EscalateDirective:
 		//send failure to parent
-		cell.parent.sendSystemMessage(msg)
+		cell.parent.TellSystem(msg)
 	}
 }
 
 func (cell *ActorCell) handleRestart(msg *restart) {
 	cell.stopping = false
-	cell.invokeUserMessage(Restarting{}) //TODO: change to restarting
-	for _, child := range cell.children.Values() {
+	cell.invokeUserMessage(States_Restarting) //TODO: change to restarting
+	for child := range cell.children {
 		child.(*PID).Stop()
 	}
 	cell.tryRestartOrTerminate()
 }
 
 func (cell *ActorCell) tryRestartOrTerminate() {
-	if !cell.children.Empty() {
+	if !(len(cell.children) == 0) {
 		return
 	}
 
@@ -161,15 +162,15 @@ func (cell *ActorCell) tryRestartOrTerminate() {
 
 func (cell *ActorCell) restart() {
 	cell.incarnateActor()
-	cell.invokeUserMessage(Started{})
+	cell.invokeUserMessage(States_Started)
 }
 
 func (cell *ActorCell) stopped() {
 	ProcessRegistry.unregisterPID(cell.self)
-	cell.invokeUserMessage(Stopped{})
+	cell.invokeUserMessage(States_Stopped)
 	otherStopped := &otherStopped{Who: cell.self}
-	for _, watcher := range cell.watchers.Values() {
-		watcher.(*PID).sendSystemMessage(otherStopped)
+	for watcher := range cell.watchers {
+		watcher.(*PID).TellSystem(otherStopped)
 	}
 }
 
@@ -181,42 +182,47 @@ func (cell *ActorCell) invokeUserMessage(message interface{}) {
 				handleRootFailure(failure, defaultSupervisionStrategy)
 			} else {
 				cell.self.suspend()
-				cell.parent.sendSystemMessage(failure)
+				cell.parent.TellSystem(failure)
 			}
 		}
 	}()
-	behavior, _ := cell.behavior.Peek()
-	behavior.(Receive)(NewContext(cell, message))
+	if len(cell.behaviour) > 0 {
+		behaviour := cell.behaviour[len(cell.behaviour)-1]
+		behaviour.(Receive)(NewContext(cell, message))
+	} else {
+		fmt.Println("ERRRRRRRRRRRRROR", "EMpty stack")
+	}
+
 }
 
-func (cell *ActorCell) Become(behavior Receive) {
-	cell.behavior.Clear()
-	cell.behavior.Push(behavior)
+func (cell *ActorCell) Become(behaviour Receive) {
+	cell.behaviour = make([]interface{}, 0)
+	cell.behaviour = append(cell.behaviour, behaviour)
 }
 
-func (cell *ActorCell) BecomeStacked(behavior Receive) {
-	cell.behavior.Push(behavior)
+func (cell *ActorCell) BecomeStacked(behaviour Receive) {
+	cell.behaviour = append(cell.behaviour, behaviour)
 }
 
 func (cell *ActorCell) UnbecomeStacked() {
-	if cell.behavior.Size() <= 1 {
-		panic("Can not unbecome actor base behavior")
+	if len(cell.behaviour) <= 1 {
+		panic("Can not unbecome actor base behaviour")
 	}
-	cell.behavior.Pop()
+	cell.behaviour = cell.behaviour[:len(cell.behaviour)-1]
 }
 
 func (cell *ActorCell) Watch(who *PID) {
-	who.sendSystemMessage(&watch{
+	who.TellSystem(&watch{
 		Watcher: cell.self,
 	})
-	cell.watching.Add(who)
+	cell.watching[who] = struct{}{}
 }
 
 func (cell *ActorCell) Unwatch(who *PID) {
-	who.sendSystemMessage(&unwatch{
+	who.TellSystem(&unwatch{
 		Watcher: cell.self,
 	})
-	cell.watching.Remove(who)
+	delete(cell.watching, who)
 }
 
 // func (cell *ActorCell) ActorOf(props Properties) *PID {
@@ -228,7 +234,7 @@ func (cell *ActorCell) Unwatch(who *PID) {
 
 func (cell *ActorCell) Spawn(props Properties) *PID {
 	pid := spawnChild(props, cell.self)
-	cell.children.Add(pid)
+	cell.children[pid] = struct{}{}
 	cell.Watch(pid)
 	return pid
 }
@@ -239,15 +245,15 @@ func (cell *ActorCell) SpawnTemplate(template Actor) *PID {
 	}
 	props := Props(producer)
 	pid := spawnChild(props, cell.self)
-	cell.children.Add(pid)
+	cell.children[pid] = struct{}{}
 	cell.Watch(pid)
 	return pid
 }
 
-func (cell *ActorCell) SpawnFunc(producer ActorProducer) *PID {
+func (cell *ActorCell) SpawnFunc(producer ActorInit) *PID {
 	props := Props(producer)
 	pid := spawnChild(props, cell.self)
-	cell.children.Add(pid)
+	cell.children[pid] = struct{}{}
 	cell.Watch(pid)
 	return pid
 }
@@ -257,10 +263,10 @@ func handleRootFailure(msg *failure, supervisor SupervisionStrategy) {
 	switch directive {
 	case ResumeDirective:
 		//resume the fialing child
-		msg.Who.sendSystemMessage(&resume{})
+		msg.Who.TellSystem(&resume{})
 	case RestartDirective:
 		//restart the failing child
-		msg.Who.sendSystemMessage(&restart{})
+		msg.Who.TellSystem(&restart{})
 	case StopDirective:
 		//stop the failing child
 		msg.Who.Stop()

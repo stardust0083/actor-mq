@@ -11,7 +11,7 @@ message PID {
 enum States{
     Empty=0;
     Restarting =1;
-    Stoppint=2;
+    Stopping=2;
     Stopped=3;
     PoisonPill=4;
     Started=5;

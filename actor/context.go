@@ -30,17 +30,17 @@ type ActorCell struct {
 	stopping   bool
 }
 
-type ContextEntity struct {
+type FuncActor struct {
 	*ActorCell
 	message interface{}
 }
 
-func (c *ContextEntity) Message() interface{} {
+func (c *FuncActor) Message() interface{} {
 	return c.message
 }
 
 func NewContext(cel *ActorCell, message interface{}) Context {
-	res := &ContextEntity{
+	res := &FuncActor{
 		ActorCell: cel,
 		message:   message,
 	}
@@ -106,7 +106,7 @@ func (cell *ActorCell) invokeSystemMessage(message SystemMessage) {
 
 func (cell *ActorCell) handleStop(msg *stop) {
 	cell.stopping = true
-	cell.invokeUserMessage(States_Stopping)
+	cell.invokeUserMessage(StateMsg{State: States_Stopping})
 	for child := range cell.children {
 		child.(*PID).Stop()
 	}
@@ -139,7 +139,7 @@ func (cell *ActorCell) handleFailure(msg *failure) {
 
 func (cell *ActorCell) handleRestart(msg *restart) {
 	cell.stopping = false
-	cell.invokeUserMessage(States_Restarting) //TODO: change to restarting
+	cell.invokeUserMessage(StateMsg{State: States_Restarting}) //TODO: change to restarting
 	for child := range cell.children {
 		child.(*PID).Stop()
 	}
@@ -159,12 +159,12 @@ func (cell *ActorCell) tryRestartOrTerminate() {
 
 func (cell *ActorCell) restart() {
 	cell.incarnateActor()
-	cell.invokeUserMessage(States_Started)
+	cell.invokeUserMessage(StateMsg{State: States_Started})
 }
 
 func (cell *ActorCell) stopped() {
 	PIDMgr.unregisterPID(cell.self)
-	cell.invokeUserMessage(States_Stopped)
+	cell.invokeUserMessage(StateMsg{State: States_Stopped})
 	otherStopped := &otherStopped{Who: cell.self}
 	for watcher := range cell.watchers {
 		watcher.(*PID).SendCtrlMsg(otherStopped)

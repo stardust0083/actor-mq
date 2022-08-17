@@ -126,9 +126,12 @@ func TestActorCanUnbecome(t *testing.T) {
 type EchoOnStartActor struct{ replyTo *PID }
 
 func (state *EchoOnStartActor) Receive(context Context) {
-	switch context.Message().(States) {
-	case States_Started:
-		state.replyTo.SendMsg(EchoReplyMessage{})
+	switch context.Message().(type) {
+	case StateMsg:
+		switch context.Message().(StateMsg).State {
+		case States_Started:
+			state.replyTo.SendMsg(EchoReplyMessage{})
+		}
 	}
 }
 
@@ -151,9 +154,12 @@ func NewEchoOnStartActor(replyTo *PID) func() Actor {
 type EchoOnStoppingActor struct{ replyTo *PID }
 
 func (state *EchoOnStoppingActor) Receive(context Context) {
-	switch context.Message().(States) {
-	case States_Stopping:
-		state.replyTo.SendMsg(EchoReplyMessage{})
+	switch context.Message().(type) {
+	case StateMsg:
+		switch context.Message().(StateMsg).State {
+		case States_Stopping:
+			state.replyTo.SendMsg(EchoReplyMessage{})
+		}
 	}
 }
 
@@ -219,21 +225,20 @@ type GetChildCountMessage2 struct {
 }
 
 func (state *CreateChildThenStopActor) Receive(context Context) {
-	msg, ok := context.Message().(States)
-	if !ok {
-		switch msg := context.Message().(type) {
-		case CreateChildMessage:
-			context.Spawn(Props(NewBlackHoleActor))
-		case GetChildCountMessage2:
-			msg.ReplyDirectly.SendMsg(true)
-			state.replyTo = msg.ReplyAfterStop
-		}
-	} else {
-		if msg == States_Stopped {
+	switch msg := context.Message().(type) {
+	case CreateChildMessage:
+		context.Spawn(Props(NewBlackHoleActor))
+	case GetChildCountMessage2:
+		msg.ReplyDirectly.SendMsg(true)
+		state.replyTo = msg.ReplyAfterStop
+	case StateMsg:
+		switch context.Message().(StateMsg).State {
+		case States_Stopped:
 			reply := GetChildCountReplyMessage{ChildCount: len(context.Children())}
 			state.replyTo.SendMsg(reply)
 		}
 	}
+
 }
 
 func NewCreateChildThenStopActor() Actor {

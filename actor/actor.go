@@ -12,7 +12,7 @@ type ActorEntity struct {
 	mailbox BaseMailbox
 }
 
-func NewLocalActorRef(mailbox BaseMailbox) *ActorEntity {
+func NewActorEntity(mailbox BaseMailbox) *ActorEntity {
 	return &ActorEntity{mailbox: mailbox}
 }
 

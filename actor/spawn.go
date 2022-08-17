@@ -26,7 +26,7 @@ func spawnChild(props Properties, parent *PID) *PID {
 	cell := NewActorCell(props, parent)
 	mailbox := props.ProduceMailbox()
 	mailbox.RegisterHandlers(cell.invokeUserMessage, cell.invokeSystemMessage)
-	ref := NewLocalActorRef(mailbox)
+	ref := NewActorEntity(mailbox)
 	pid := PIDMgr.registerPID(ref)
 	cell.self = pid
 	cell.invokeUserMessage(States_Started)

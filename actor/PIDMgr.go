@@ -7,7 +7,8 @@ import (
 )
 
 type HostResolver func(*PID) (ActorRef, bool)
-type ProcessRegistryValue struct {
+
+type PIDMgrStruct struct {
 	Host           string
 	LocalPids      map[string]ActorRef //maybe this should be replaced with something lockfree like ctrie instead
 	RemoteHandlers []HostResolver
@@ -15,17 +16,17 @@ type ProcessRegistryValue struct {
 	rw             sync.RWMutex
 }
 
-var ProcessRegistry = &ProcessRegistryValue{
+var PIDMgr = &PIDMgrStruct{
 	Host:           "nonhost",
 	LocalPids:      make(map[string]ActorRef),
 	RemoteHandlers: make([]HostResolver, 0),
 }
 
-func (pr *ProcessRegistryValue) RegisterHostResolver(handler HostResolver) {
+func (pr *PIDMgrStruct) RegisterHostResolver(handler HostResolver) {
 	pr.RemoteHandlers = append(pr.RemoteHandlers, handler)
 }
 
-func (pr *ProcessRegistryValue) registerPID(actorRef ActorRef) *PID {
+func (pr *PIDMgrStruct) registerPID(actorRef ActorRef) *PID {
 	id := atomic.AddUint64(&pr.SequenceID, 1)
 
 	pid := PID{
@@ -39,13 +40,13 @@ func (pr *ProcessRegistryValue) registerPID(actorRef ActorRef) *PID {
 	return &pid
 }
 
-func (pr *ProcessRegistryValue) unregisterPID(pid *PID) {
+func (pr *PIDMgrStruct) unregisterPID(pid *PID) {
 	pr.rw.Lock()
 	defer pr.rw.Unlock()
 	delete(pr.LocalPids, pid.Id)
 }
 
-func (pr *ProcessRegistryValue) fromPID(pid *PID) (ActorRef, bool) {
+func (pr *PIDMgrStruct) fromPID(pid *PID) (ActorRef, bool) {
 	if pid.Host != pr.Host {
 		for _, handler := range pr.RemoteHandlers {
 			ref, ok := handler(pid)
@@ -54,19 +55,19 @@ func (pr *ProcessRegistryValue) fromPID(pid *PID) (ActorRef, bool) {
 			}
 		}
 		//panic("Unknown host or node")
-		return deadActor, false
+		return emptyActor, false
 	}
 	pr.rw.RLock()
 	defer pr.rw.RUnlock()
 	ref, ok := pr.LocalPids[pid.Id]
 	if !ok {
 		//panic("Unknown PID")
-		return deadActor, false
+		return emptyActor, false
 	}
 	return ref, true
 }
 
-func (pr *ProcessRegistryValue) Register(name string, pid *PID) {
+func (pr *PIDMgrStruct) Register(name string, pid *PID) {
 	ref, _ := pr.fromPID(pid)
 	pr.LocalPids[name] = ref
 }

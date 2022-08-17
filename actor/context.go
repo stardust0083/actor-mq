@@ -6,32 +6,15 @@ type Context interface {
 	Watch(*PID)
 	UnWatch(*PID)
 	Message() interface{}
-	Become(Receive)
-	BecomeStacked(Receive)
+	Become(func(Context))
+	BecomeStacked(func(Context))
 	UnBecomeStacked()
 	Self() *PID
 	Parent() *PID
 	Spawn(Properties) *PID
 	SpawnTemplate(Actor) *PID
-	SpawnFunc(ActorInit) *PID
+	SpawnFunc(func() Actor) *PID
 	Children() []*PID
-}
-
-type ContextValue struct {
-	*ActorCell
-	message interface{}
-}
-
-func (c *ContextValue) Message() interface{} {
-	return c.message
-}
-
-func NewContext(cel *ActorCell, message interface{}) Context {
-	res := &ContextValue{
-		ActorCell: cel,
-		message:   message,
-	}
-	return res
 }
 
 type ActorCell struct {
@@ -45,6 +28,23 @@ type ActorCell struct {
 	watchers   map[interface{}]struct{}
 	watching   map[interface{}]struct{}
 	stopping   bool
+}
+
+type ContextEntity struct {
+	*ActorCell
+	message interface{}
+}
+
+func (c *ContextEntity) Message() interface{} {
+	return c.message
+}
+
+func NewContext(cel *ActorCell, message interface{}) Context {
+	res := &ContextEntity{
+		ActorCell: cel,
+		message:   message,
+	}
+	return res
 }
 
 func (cell *ActorCell) Children() []*PID {
@@ -64,7 +64,6 @@ func (cell *ActorCell) Parent() *PID {
 }
 
 func NewActorCell(props Properties, parent *PID) *ActorCell {
-
 	cell := ActorCell{
 		parent:     parent,
 		props:      props,
@@ -95,7 +94,7 @@ func (cell *ActorCell) invokeSystemMessage(message SystemMessage) {
 	case *watch:
 		cell.watchers[msg.Watcher] = struct{}{}
 	case *unwatch:
-		cell.watchers[msg.Watcher] = struct{}{}
+		delete(cell.watchers, msg.Watcher)
 	case *failure:
 		cell.handleFailure(msg)
 	case *restart:
@@ -123,18 +122,18 @@ func (cell *ActorCell) handleOtherStopped(msg *otherStopped) {
 func (cell *ActorCell) handleFailure(msg *failure) {
 	directive := cell.supervisor.Handle(msg.Who, msg.Reason)
 	switch directive {
-	case ResumeDirective:
+	case Directive_ResumeDirective:
 		//resume the fialing child
-		msg.Who.TellSystem(&resume{})
-	case RestartDirective:
+		msg.Who.SendCtrlMsg(&resume{})
+	case Directive_RestartDirective:
 		//restart the failing child
-		msg.Who.TellSystem(&restart{})
-	case StopDirective:
+		msg.Who.SendCtrlMsg(&restart{})
+	case Directive_StopDirective:
 		//stop the failing child
 		msg.Who.Stop()
-	case EscalateDirective:
+	case Directive_EscalateDirective:
 		//send failure to parent
-		cell.parent.TellSystem(msg)
+		cell.parent.SendCtrlMsg(msg)
 	}
 }
 
@@ -151,12 +150,10 @@ func (cell *ActorCell) tryRestartOrTerminate() {
 	if !(len(cell.children) == 0) {
 		return
 	}
-
 	if !cell.stopping {
 		cell.restart()
 		return
 	}
-
 	cell.stopped()
 }
 
@@ -166,11 +163,11 @@ func (cell *ActorCell) restart() {
 }
 
 func (cell *ActorCell) stopped() {
-	ProcessRegistry.unregisterPID(cell.self)
+	PIDMgr.unregisterPID(cell.self)
 	cell.invokeUserMessage(States_Stopped)
 	otherStopped := &otherStopped{Who: cell.self}
 	for watcher := range cell.watchers {
-		watcher.(*PID).TellSystem(otherStopped)
+		watcher.(*PID).SendCtrlMsg(otherStopped)
 	}
 }
 
@@ -179,32 +176,32 @@ func (cell *ActorCell) invokeUserMessage(message interface{}) {
 		if r := recover(); r != nil {
 			failure := &failure{Reason: r, Who: cell.self}
 			if cell.parent == nil {
-				handleRootFailure(failure, defaultSupervisionStrategy)
+				handleRootFailure(failure, DefaultSupervisionStrategy())
 			} else {
 				cell.self.suspend()
-				cell.parent.TellSystem(failure)
+				cell.parent.SendCtrlMsg(failure)
 			}
 		}
 	}()
 	if len(cell.behaviour) > 0 {
 		behaviour := cell.behaviour[len(cell.behaviour)-1]
-		behaviour.(Receive)(NewContext(cell, message))
+		behaviour.(func(Context))(NewContext(cell, message))
 	} else {
 		fmt.Println("ERRRRRRRRRRRRROR", "EMpty stack")
 	}
 
 }
 
-func (cell *ActorCell) Become(behaviour Receive) {
+func (cell *ActorCell) Become(behaviour func(Context)) {
 	cell.behaviour = make([]interface{}, 0)
 	cell.behaviour = append(cell.behaviour, behaviour)
 }
 
-func (cell *ActorCell) BecomeStacked(behaviour Receive) {
+func (cell *ActorCell) BecomeStacked(behaviour func(Context)) {
 	cell.behaviour = append(cell.behaviour, behaviour)
 }
 
-func (cell *ActorCell) UnbecomeStacked() {
+func (cell *ActorCell) UnBecomeStacked() {
 	if len(cell.behaviour) <= 1 {
 		panic("Can not unbecome actor base behaviour")
 	}
@@ -212,25 +209,18 @@ func (cell *ActorCell) UnbecomeStacked() {
 }
 
 func (cell *ActorCell) Watch(who *PID) {
-	who.TellSystem(&watch{
+	who.SendCtrlMsg(&watch{
 		Watcher: cell.self,
 	})
 	cell.watching[who] = struct{}{}
 }
 
-func (cell *ActorCell) Unwatch(who *PID) {
-	who.TellSystem(&unwatch{
+func (cell *ActorCell) UnWatch(who *PID) {
+	who.SendCtrlMsg(&unwatch{
 		Watcher: cell.self,
 	})
 	delete(cell.watching, who)
 }
-
-// func (cell *ActorCell) ActorOf(props Properties) *PID {
-// 	_, pid := spawnChild(props, cell.self)
-// 	cell.children.Add(pid)
-// 	cell.Watch(pid)
-// 	return pid
-// }
 
 func (cell *ActorCell) Spawn(props Properties) *PID {
 	pid := spawnChild(props, cell.self)
@@ -250,7 +240,7 @@ func (cell *ActorCell) SpawnTemplate(template Actor) *PID {
 	return pid
 }
 
-func (cell *ActorCell) SpawnFunc(producer ActorInit) *PID {
+func (cell *ActorCell) SpawnFunc(producer func() Actor) *PID {
 	props := Props(producer)
 	pid := spawnChild(props, cell.self)
 	cell.children[pid] = struct{}{}
@@ -261,16 +251,16 @@ func (cell *ActorCell) SpawnFunc(producer ActorInit) *PID {
 func handleRootFailure(msg *failure, supervisor SupervisionStrategy) {
 	directive := supervisor.Handle(msg.Who, msg.Reason)
 	switch directive {
-	case ResumeDirective:
+	case Directive_ResumeDirective:
 		//resume the fialing child
-		msg.Who.TellSystem(&resume{})
-	case RestartDirective:
+		msg.Who.SendCtrlMsg(&resume{})
+	case Directive_RestartDirective:
 		//restart the failing child
-		msg.Who.TellSystem(&restart{})
-	case StopDirective:
+		msg.Who.SendCtrlMsg(&restart{})
+	case Directive_StopDirective:
 		//stop the failing child
 		msg.Who.Stop()
-	case EscalateDirective:
+	case Directive_EscalateDirective:
 		//send failure to parent
 		panic("Can not escalate root level failures")
 	}

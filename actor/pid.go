@@ -1,33 +1,33 @@
 package actor
 
-func (pid *PID) Tell(message interface{}) {
-	ref, _ := ProcessRegistry.fromPID(pid)
-	ref.Tell(message)
+func (pid *PID) SendMsg(message interface{}) {
+	ref, _ := PIDMgr.fromPID(pid)
+	ref.SendMsg(message)
 }
 
-func Tell(pid *PID, message interface{}) {
-	ref, _ := ProcessRegistry.fromPID(pid)
-	ref.Tell(message)
+func SendMsg(pid *PID, message interface{}) {
+	ref, _ := PIDMgr.fromPID(pid)
+	ref.SendMsg(message)
 }
 
-func (pid *PID) TellSystem(message SystemMessage) {
-	ref, _ := ProcessRegistry.fromPID(pid)
-	ref.TellSystem(message)
+func (pid *PID) SendCtrlMsg(message SystemMessage) {
+	ref, _ := PIDMgr.fromPID(pid)
+	ref.SendCtrlMsg(message)
 }
 
 func (pid *PID) Stop() {
-	ref, _ := ProcessRegistry.fromPID(pid)
+	ref, _ := PIDMgr.fromPID(pid)
 	ref.Stop()
 }
 
 func (pid *PID) suspend() {
-	ref, _ := ProcessRegistry.fromPID(pid)
-	ref.(*LocalActorRef).Suspend()
+	ref, _ := PIDMgr.fromPID(pid)
+	ref.(*ActorEntity).Suspend()
 }
 
 func (pid *PID) resume() {
-	ref, _ := ProcessRegistry.fromPID(pid)
-	ref.(*LocalActorRef).Resume()
+	ref, _ := PIDMgr.fromPID(pid)
+	ref.(*ActorEntity).Resume()
 }
 
 func NewPID(host, id string) *PID {

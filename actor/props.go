@@ -2,13 +2,13 @@ package actor
 
 type Properties interface {
 	ProduceActor() Actor
-	ProduceMailbox() Mailbox
+	ProduceMailbox() BaseMailbox
 	Supervisor() SupervisionStrategy
 }
 
 type PropsValue struct {
-	actorProducer       ActorProducer
-	mailboxProducer     MailboxProducer
+	actorProducer       func() Actor
+	mailboxProducer     func() BaseMailbox
 	supervisionStrategy SupervisionStrategy
 }
 
@@ -23,21 +23,21 @@ func (props PropsValue) Supervisor() SupervisionStrategy {
 	return props.supervisionStrategy
 }
 
-func (props PropsValue) ProduceMailbox() Mailbox {
+func (props PropsValue) ProduceMailbox() BaseMailbox {
 	if props.mailboxProducer == nil {
-		return NewUnboundedMailbox()
+		return NewMailBox()
 	}
 	return props.mailboxProducer()
 }
 
-func Props(actorProducer ActorProducer) PropsValue {
+func Props(actorProducer func() Actor) PropsValue {
 	return PropsValue{
 		actorProducer:   actorProducer,
 		mailboxProducer: nil,
 	}
 }
 
-func (props PropsValue) WithMailbox(mailbox MailboxProducer) PropsValue {
+func (props PropsValue) WithMailbox(mailbox func() BaseMailbox) PropsValue {
 	//pass by value, we only modify the copy
 	props.mailboxProducer = mailbox
 	return props

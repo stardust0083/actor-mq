@@ -9,7 +9,7 @@ func RequestResponsePID() (*PID, *Response) {
 	ref := &Response{
 		channel: make(chan interface{}),
 	}
-	pid := ProcessRegistry.registerPID(ref)
+	pid := PIDMgr.registerPID(ref)
 	return pid, ref
 }
 
@@ -17,7 +17,7 @@ type Response struct {
 	channel chan interface{}
 }
 
-func (ref *Response) Tell(message interface{}) {
+func (ref *Response) SendMsg(message interface{}) {
 	ref.channel <- message
 }
 
@@ -38,7 +38,7 @@ func (ref *Response) Result() interface{} {
 	return <-ref.channel
 }
 
-func (ref *Response) TellSystem(message SystemMessage) {
+func (ref *Response) SendCtrlMsg(message SystemMessage) {
 }
 
 func (ref *Response) Stop() {

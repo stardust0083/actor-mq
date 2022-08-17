@@ -1,6 +1,7 @@
 package actor
 
 import (
+	"runtime"
 	"sync/atomic"
 )
 
@@ -14,7 +15,6 @@ const (
 	MailboxHasMoreMessages int32 = 1
 )
 
-type MailboxProducer func() BaseMailbox
 type BaseMailbox interface {
 	PostUserMessage(message interface{})
 	PostSystemMessage(message SystemMessage)
@@ -60,7 +60,7 @@ func (mb *Mailbox) Resume() {
 func (mb *Mailbox) processMessages() {
 	atomic.StoreInt32(&mb.hasMoreMessages, MailboxHasMoreMessages)
 	done := false
-	for i := 0; i < chanmaxlen; i++ {
+	for !done {
 		select {
 		case sysMsg := <-mb.systemMailbox:
 			mb.systemInvoke(sysMsg)
@@ -73,9 +73,7 @@ func (mb *Mailbox) processMessages() {
 				break
 			}
 		}
-	}
-	if !done {
-		atomic.StoreInt32(&mb.hasMoreMessages, MailboxHasMoreMessages)
+		runtime.Gosched()
 	}
 	atomic.StoreInt32(&mb.schedulerStatus, MailboxIdle)
 	if atomic.SwapInt32(&mb.hasMoreMessages, MailboxHasNoMessages) == MailboxHasMoreMessages {

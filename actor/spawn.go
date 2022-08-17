@@ -1,6 +1,6 @@
 package actor
 
-func SpawnFunc(producer ActorInit) *PID {
+func SpawnFunc(producer func() Actor) *PID {
 	props := Props(producer)
 	pid := spawnChild(props, nil)
 	return pid
@@ -27,7 +27,7 @@ func spawnChild(props Properties, parent *PID) *PID {
 	mailbox := props.ProduceMailbox()
 	mailbox.RegisterHandlers(cell.invokeUserMessage, cell.invokeSystemMessage)
 	ref := NewLocalActorRef(mailbox)
-	pid := ProcessRegistry.registerPID(ref)
+	pid := PIDMgr.registerPID(ref)
 	cell.self = pid
 	cell.invokeUserMessage(States_Started)
 	return pid

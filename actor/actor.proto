@@ -16,3 +16,14 @@ enum States{
     PoisonPill=4;
     Started=5;
 }
+
+enum Directive{
+    EmptyDirective=0;
+    ResumeDirective=1;
+	RestartDirective=2;
+	StopDirective=3;
+	EscalateDirective=4;
+}
+message StateMsg{
+    States State=1;
+}

@@ -22,6 +22,13 @@ func (r *routerMgr) Receive(context actor.Context) {
 type CliUser struct {
 }
 
+func (r *CliUser) Receive(context actor.Context) {
+	switch msg := context.Message().(type) {
+	case *pb.SyncRouterMsg:
+		r.RouterList = msg.Router
+		fmt.Println(r.RouterList)
+	}
+}
 func StartClient(host string, port string) {
 	remote.StartServer(fmt.Sprintf("%s:%s", host, port))
 	pidrm := actor.SpawnTemplate(&routerMgr{RouterList: make([]*actor.PID, 0)})

@@ -1,16 +1,20 @@
 syntax = "proto3";
 package remote;
-import "actor.proto";
+import "actor-mq/actor/actor.proto";
 // option go_package = "./remote_actor";
 
 message MessageEnvelope {
   string type_name = 1;
   bytes message_data = 2;
-  PID target = 3;
+  actor.PID target = 3;
 }
 
+message MessageBatch {
+    repeated MessageEnvelope envelopes = 1;
+  }
+  
 message Unit {}
 
-service Remoting {
-  rpc Receive (stream MessageEnvelope) returns (Unit) {}
+service Remote {
+  rpc ReceiveMsg (stream MessageEnvelope) returns (Unit) {}
 }

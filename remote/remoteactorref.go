@@ -1,7 +1,6 @@
 package remote
 
 import (
-	fmt "fmt"
 	"log"
 
 	"actor-mq/actor"
@@ -25,7 +24,6 @@ func newRemoteActorRef(pid *actor.PID) actor.ActorRef {
 }
 
 func (ref *RemoteActorRef) SendMsg(message interface{}) {
-	fmt.Println("Send Rmote")
 	switch msg := message.(type) {
 	case proto.Message:
 		envelope, _ := PackMessage(msg, ref.pid)

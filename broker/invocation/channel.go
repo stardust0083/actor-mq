@@ -2,6 +2,7 @@ package invocation
 
 import (
 	"actor-mq/pb"
+	"actor-mq/actor"
 )
 
 type Channel struct {

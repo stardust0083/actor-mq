@@ -1,11 +1,17 @@
 package actor
 
+import (
+	fmt "fmt"
+	"strings"
+)
+
 func (pid *PID) SendMsg(message interface{}) {
 	ref, _ := PIDMgr.fromPID(pid)
 	ref.SendMsg(message)
 }
 
 func SendMsg(pid *PID, message interface{}) {
+	fmt.Println(pid, message)
 	ref, _ := PIDMgr.fromPID(pid)
 	ref.SendMsg(message)
 }
@@ -31,6 +37,7 @@ func (pid *PID) resume() {
 }
 
 func NewPID(host, id string) *PID {
+	host = strings.ReplaceAll(host, "localhost", "127.0.0.1")
 	return &PID{
 		Host: host,
 		Id:   id,

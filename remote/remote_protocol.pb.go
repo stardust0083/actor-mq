@@ -89,56 +89,13 @@ func (m *MessageEnvelope) GetTarget() *actor.PID {
 	return nil
 }
 
-type MessageBatch struct {
-	Envelopes []*MessageEnvelope `protobuf:"bytes,1,rep,name=envelopes,proto3" json:"envelopes,omitempty"`
-}
-
-func (m *MessageBatch) Reset()      { *m = MessageBatch{} }
-func (*MessageBatch) ProtoMessage() {}
-func (*MessageBatch) Descriptor() ([]byte, []int) {
-	return fileDescriptor_84fb54d0f8c0b850, []int{1}
-}
-func (m *MessageBatch) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *MessageBatch) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_MessageBatch.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *MessageBatch) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_MessageBatch.Merge(m, src)
-}
-func (m *MessageBatch) XXX_Size() int {
-	return m.Size()
-}
-func (m *MessageBatch) XXX_DiscardUnknown() {
-	xxx_messageInfo_MessageBatch.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_MessageBatch proto.InternalMessageInfo
-
-func (m *MessageBatch) GetEnvelopes() []*MessageEnvelope {
-	if m != nil {
-		return m.Envelopes
-	}
-	return nil
-}
-
 type Unit struct {
 }
 
 func (m *Unit) Reset()      { *m = Unit{} }
 func (*Unit) ProtoMessage() {}
 func (*Unit) Descriptor() ([]byte, []int) {
-	return fileDescriptor_84fb54d0f8c0b850, []int{2}
+	return fileDescriptor_84fb54d0f8c0b850, []int{1}
 }
 func (m *Unit) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -169,7 +126,6 @@ var xxx_messageInfo_Unit proto.InternalMessageInfo
 
 func init() {
 	proto.RegisterType((*MessageEnvelope)(nil), "remote.MessageEnvelope")
-	proto.RegisterType((*MessageBatch)(nil), "remote.MessageBatch")
 	proto.RegisterType((*Unit)(nil), "remote.Unit")
 }
 
@@ -178,27 +134,25 @@ func init() {
 }
 
 var fileDescriptor_84fb54d0f8c0b850 = []byte{
-	// 305 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x74, 0x90, 0xc1, 0x4a, 0xf3, 0x40,
-	0x14, 0x85, 0xe7, 0xfe, 0xfd, 0x09, 0xf6, 0x36, 0x20, 0xcc, 0xc6, 0x50, 0xe1, 0x12, 0x03, 0x42,
-	0x36, 0x46, 0xa8, 0x8a, 0x6b, 0x4b, 0xbb, 0x70, 0x51, 0x91, 0x80, 0xeb, 0x32, 0xc6, 0x4b, 0x2d,
-	0x34, 0x9d, 0x9a, 0x8c, 0x05, 0x77, 0x3e, 0x82, 0x8f, 0xe1, 0xa3, 0xb8, 0xec, 0xb2, 0x4b, 0x3b,
-	0xdd, 0xb8, 0xec, 0x23, 0x48, 0x33, 0x51, 0x41, 0x70, 0x33, 0x73, 0x39, 0xe7, 0x9b, 0x39, 0x87,
-	0x8b, 0x87, 0x2a, 0x33, 0xba, 0x38, 0xca, 0x1f, 0x8e, 0x0b, 0xce, 0xb5, 0xe1, 0xfa, 0x1a, 0xce,
-	0x0a, 0x6d, 0x74, 0xa6, 0x27, 0x49, 0x35, 0x48, 0xcf, 0xc9, 0xed, 0xf6, 0x37, 0x5e, 0x0d, 0xee,
-	0x74, 0x4c, 0xf4, 0x88, 0xbb, 0x03, 0x2e, 0x4b, 0x35, 0xe2, 0xfe, 0x74, 0xce, 0x13, 0x3d, 0x63,
-	0xb9, 0x8f, 0x4d, 0xf3, 0x34, 0xe3, 0xe1, 0x54, 0xe5, 0x1c, 0x40, 0x08, 0x71, 0x33, 0xdd, 0xd9,
-	0x0a, 0x57, 0x2a, 0x67, 0x79, 0x80, 0x7e, 0xee, 0xf8, 0xe1, 0x9d, 0x32, 0x2a, 0xf8, 0x17, 0x42,
-	0xec, 0xa7, 0xad, 0x5a, 0xeb, 0x29, 0xa3, 0x64, 0x84, 0x9e, 0x51, 0xc5, 0x88, 0x4d, 0xd0, 0x08,
-	0x21, 0x6e, 0x75, 0x30, 0x71, 0x81, 0xd7, 0x97, 0xbd, 0xb4, 0x76, 0xa2, 0x3e, 0xfa, 0x75, 0x6c,
-	0x57, 0x99, 0xec, 0x5e, 0x9e, 0x61, 0x93, 0xeb, 0xfc, 0x32, 0x80, 0xb0, 0x11, 0xb7, 0x3a, 0x7b,
-	0x89, 0xab, 0x9f, 0xfc, 0xea, 0x97, 0xfe, 0x90, 0x91, 0x87, 0xff, 0x6f, 0xa6, 0x63, 0xd3, 0xb9,
-	0x40, 0x2f, 0xad, 0x60, 0x79, 0x8e, 0x98, 0x72, 0xc6, 0xe3, 0x39, 0x0f, 0xca, 0x91, 0xfc, 0xeb,
-	0x8f, 0xb6, 0xff, 0x65, 0x6c, 0x9f, 0x47, 0x22, 0x86, 0xee, 0xe9, 0x62, 0x45, 0x62, 0xb9, 0x22,
-	0xb1, 0x59, 0x11, 0x3c, 0x5b, 0x82, 0x57, 0x4b, 0xf0, 0x66, 0x09, 0x16, 0x96, 0xe0, 0xdd, 0x12,
-	0x7c, 0x58, 0x12, 0x1b, 0x4b, 0xf0, 0xb2, 0x26, 0xb1, 0x58, 0x93, 0x58, 0xae, 0x49, 0xdc, 0x7a,
-	0xd5, 0x16, 0x4f, 0x3e, 0x03, 0x00, 0x00, 0xff, 0xff, 0x53, 0x21, 0xb4, 0x6f, 0x92, 0x01, 0x00,
-	0x00,
+	// 278 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0x52, 0x4d, 0x4c, 0x2e, 0xc9,
+	0x2f, 0xd2, 0xcd, 0x2d, 0xd4, 0x2f, 0x4a, 0xcd, 0xcd, 0x2f, 0x49, 0x85, 0x52, 0xf1, 0x05, 0x45,
+	0xf9, 0x25, 0xf9, 0xc9, 0xf9, 0x39, 0x7a, 0x60, 0x86, 0x10, 0x1b, 0x44, 0x58, 0x4a, 0x0a, 0xae,
+	0x1c, 0xcc, 0x80, 0x90, 0x10, 0x35, 0x4a, 0xa5, 0x5c, 0xfc, 0xbe, 0xa9, 0xc5, 0xc5, 0x89, 0xe9,
+	0xa9, 0xae, 0x79, 0x65, 0xa9, 0x39, 0xf9, 0x05, 0xa9, 0x42, 0xd2, 0x5c, 0x9c, 0x25, 0x95, 0x05,
+	0xa9, 0xf1, 0x79, 0x89, 0xb9, 0xa9, 0x12, 0x8c, 0x0a, 0x8c, 0x1a, 0x9c, 0x41, 0x1c, 0x20, 0x01,
+	0xbf, 0xc4, 0xdc, 0x54, 0x21, 0x45, 0x2e, 0x9e, 0x5c, 0x88, 0xfa, 0xf8, 0x94, 0xc4, 0x92, 0x44,
+	0x09, 0x26, 0x05, 0x46, 0x0d, 0x9e, 0x20, 0x6e, 0xa8, 0x98, 0x4b, 0x62, 0x49, 0xa2, 0x90, 0x12,
+	0x17, 0x5b, 0x49, 0x62, 0x51, 0x7a, 0x6a, 0x89, 0x04, 0xb3, 0x02, 0xa3, 0x06, 0xb7, 0x11, 0x97,
+	0x1e, 0xc4, 0xc2, 0x00, 0x4f, 0x97, 0x20, 0xa8, 0x8c, 0x12, 0x1b, 0x17, 0x4b, 0x68, 0x5e, 0x66,
+	0x89, 0x91, 0x13, 0x17, 0x5b, 0x10, 0xd8, 0x91, 0x42, 0x16, 0x5c, 0xdc, 0xbe, 0xc5, 0xe9, 0xc1,
+	0xa9, 0x79, 0x29, 0x41, 0xa9, 0xc9, 0x65, 0x42, 0xe2, 0x7a, 0x10, 0xc7, 0xeb, 0xa1, 0xb9, 0x4e,
+	0x8a, 0x07, 0x26, 0x01, 0xd2, 0xaf, 0xc4, 0xa0, 0xc1, 0xe8, 0x64, 0x72, 0xe1, 0xa1, 0x1c, 0xc3,
+	0x8d, 0x87, 0x72, 0x0c, 0x1f, 0x1e, 0xca, 0x31, 0x36, 0x3c, 0x92, 0x63, 0x5c, 0xf1, 0x48, 0x8e,
+	0xf1, 0xc4, 0x23, 0x39, 0xc6, 0x0b, 0x8f, 0xe4, 0x18, 0x1f, 0x3c, 0x92, 0x63, 0x7c, 0xf1, 0x48,
+	0x8e, 0xe1, 0xc3, 0x23, 0x39, 0xc6, 0x09, 0x8f, 0xe5, 0x18, 0x2e, 0x3c, 0x96, 0x63, 0xb8, 0xf1,
+	0x58, 0x8e, 0x21, 0x89, 0x0d, 0xec, 0x7f, 0x63, 0x40, 0x00, 0x00, 0x00, 0xff, 0xff, 0xb4, 0x2d,
+	0xcb, 0xae, 0x4c, 0x01, 0x00, 0x00,
 }
 
 func (this *MessageEnvelope) Equal(that interface{}) bool {
@@ -228,35 +182,6 @@ func (this *MessageEnvelope) Equal(that interface{}) bool {
 	}
 	if !this.Target.Equal(that1.Target) {
 		return false
-	}
-	return true
-}
-func (this *MessageBatch) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*MessageBatch)
-	if !ok {
-		that2, ok := that.(MessageBatch)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if len(this.Envelopes) != len(that1.Envelopes) {
-		return false
-	}
-	for i := range this.Envelopes {
-		if !this.Envelopes[i].Equal(that1.Envelopes[i]) {
-			return false
-		}
 	}
 	return true
 }
@@ -295,18 +220,6 @@ func (this *MessageEnvelope) GoString() string {
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
-func (this *MessageBatch) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := make([]string, 0, 5)
-	s = append(s, "&remote.MessageBatch{")
-	if this.Envelopes != nil {
-		s = append(s, "Envelopes: "+fmt.Sprintf("%#v", this.Envelopes)+",\n")
-	}
-	s = append(s, "}")
-	return strings.Join(s, "")
-}
 func (this *Unit) GoString() string {
 	if this == nil {
 		return "nil"
@@ -337,7 +250,7 @@ const _ = grpc.SupportPackageIsVersion4
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type RemoteClient interface {
-	ReceiveMsg(ctx context.Context, opts ...grpc.CallOption) (Remote_ReceiveMsgClient, error)
+	MsgSendRecv(ctx context.Context, opts ...grpc.CallOption) (Remote_MsgSendRecvClient, error)
 }
 
 type remoteClient struct {
@@ -348,30 +261,30 @@ func NewRemoteClient(cc *grpc.ClientConn) RemoteClient {
 	return &remoteClient{cc}
 }
 
-func (c *remoteClient) ReceiveMsg(ctx context.Context, opts ...grpc.CallOption) (Remote_ReceiveMsgClient, error) {
-	stream, err := c.cc.NewStream(ctx, &_Remote_serviceDesc.Streams[0], "/remote.Remote/ReceiveMsg", opts...)
+func (c *remoteClient) MsgSendRecv(ctx context.Context, opts ...grpc.CallOption) (Remote_MsgSendRecvClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_Remote_serviceDesc.Streams[0], "/remote.Remote/MsgSendRecv", opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &remoteReceiveMsgClient{stream}
+	x := &remoteMsgSendRecvClient{stream}
 	return x, nil
 }
 
-type Remote_ReceiveMsgClient interface {
+type Remote_MsgSendRecvClient interface {
 	Send(*MessageEnvelope) error
 	CloseAndRecv() (*Unit, error)
 	grpc.ClientStream
 }
 
-type remoteReceiveMsgClient struct {
+type remoteMsgSendRecvClient struct {
 	grpc.ClientStream
 }
 
-func (x *remoteReceiveMsgClient) Send(m *MessageEnvelope) error {
+func (x *remoteMsgSendRecvClient) Send(m *MessageEnvelope) error {
 	return x.ClientStream.SendMsg(m)
 }
 
-func (x *remoteReceiveMsgClient) CloseAndRecv() (*Unit, error) {
+func (x *remoteMsgSendRecvClient) CloseAndRecv() (*Unit, error) {
 	if err := x.ClientStream.CloseSend(); err != nil {
 		return nil, err
 	}
@@ -384,40 +297,40 @@ func (x *remoteReceiveMsgClient) CloseAndRecv() (*Unit, error) {
 
 // RemoteServer is the server API for Remote service.
 type RemoteServer interface {
-	ReceiveMsg(Remote_ReceiveMsgServer) error
+	MsgSendRecv(Remote_MsgSendRecvServer) error
 }
 
 // UnimplementedRemoteServer can be embedded to have forward compatible implementations.
 type UnimplementedRemoteServer struct {
 }
 
-func (*UnimplementedRemoteServer) ReceiveMsg(srv Remote_ReceiveMsgServer) error {
-	return status.Errorf(codes.Unimplemented, "method ReceiveMsg not implemented")
+func (*UnimplementedRemoteServer) MsgSendRecv(srv Remote_MsgSendRecvServer) error {
+	return status.Errorf(codes.Unimplemented, "method MsgSendRecv not implemented")
 }
 
 func RegisterRemoteServer(s *grpc.Server, srv RemoteServer) {
 	s.RegisterService(&_Remote_serviceDesc, srv)
 }
 
-func _Remote_ReceiveMsg_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(RemoteServer).ReceiveMsg(&remoteReceiveMsgServer{stream})
+func _Remote_MsgSendRecv_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(RemoteServer).MsgSendRecv(&remoteMsgSendRecvServer{stream})
 }
 
-type Remote_ReceiveMsgServer interface {
+type Remote_MsgSendRecvServer interface {
 	SendAndClose(*Unit) error
 	Recv() (*MessageEnvelope, error)
 	grpc.ServerStream
 }
 
-type remoteReceiveMsgServer struct {
+type remoteMsgSendRecvServer struct {
 	grpc.ServerStream
 }
 
-func (x *remoteReceiveMsgServer) SendAndClose(m *Unit) error {
+func (x *remoteMsgSendRecvServer) SendAndClose(m *Unit) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func (x *remoteReceiveMsgServer) Recv() (*MessageEnvelope, error) {
+func (x *remoteMsgSendRecvServer) Recv() (*MessageEnvelope, error) {
 	m := new(MessageEnvelope)
 	if err := x.ServerStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -431,8 +344,8 @@ var _Remote_serviceDesc = grpc.ServiceDesc{
 	Methods:     []grpc.MethodDesc{},
 	Streams: []grpc.StreamDesc{
 		{
-			StreamName:    "ReceiveMsg",
-			Handler:       _Remote_ReceiveMsg_Handler,
+			StreamName:    "MsgSendRecv",
+			Handler:       _Remote_MsgSendRecv_Handler,
 			ClientStreams: true,
 		},
 	},
@@ -484,43 +397,6 @@ func (m *MessageEnvelope) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i = encodeVarintRemoteProtocol(dAtA, i, uint64(len(m.TypeName)))
 		i--
 		dAtA[i] = 0xa
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *MessageBatch) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *MessageBatch) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *MessageBatch) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.Envelopes) > 0 {
-		for iNdEx := len(m.Envelopes) - 1; iNdEx >= 0; iNdEx-- {
-			{
-				size, err := m.Envelopes[iNdEx].MarshalToSizedBuffer(dAtA[:i])
-				if err != nil {
-					return 0, err
-				}
-				i -= size
-				i = encodeVarintRemoteProtocol(dAtA, i, uint64(size))
-			}
-			i--
-			dAtA[i] = 0xa
-		}
 	}
 	return len(dAtA) - i, nil
 }
@@ -580,21 +456,6 @@ func (m *MessageEnvelope) Size() (n int) {
 	return n
 }
 
-func (m *MessageBatch) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if len(m.Envelopes) > 0 {
-		for _, e := range m.Envelopes {
-			l = e.Size()
-			n += 1 + l + sovRemoteProtocol(uint64(l))
-		}
-	}
-	return n
-}
-
 func (m *Unit) Size() (n int) {
 	if m == nil {
 		return 0
@@ -618,21 +479,6 @@ func (this *MessageEnvelope) String() string {
 		`TypeName:` + fmt.Sprintf("%v", this.TypeName) + `,`,
 		`MessageData:` + fmt.Sprintf("%v", this.MessageData) + `,`,
 		`Target:` + strings.Replace(fmt.Sprintf("%v", this.Target), "PID", "actor.PID", 1) + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func (this *MessageBatch) String() string {
-	if this == nil {
-		return "nil"
-	}
-	repeatedStringForEnvelopes := "[]*MessageEnvelope{"
-	for _, f := range this.Envelopes {
-		repeatedStringForEnvelopes += strings.Replace(f.String(), "MessageEnvelope", "MessageEnvelope", 1) + ","
-	}
-	repeatedStringForEnvelopes += "}"
-	s := strings.Join([]string{`&MessageBatch{`,
-		`Envelopes:` + repeatedStringForEnvelopes + `,`,
 		`}`,
 	}, "")
 	return s
@@ -782,90 +628,6 @@ func (m *MessageEnvelope) Unmarshal(dAtA []byte) error {
 				m.Target = &actor.PID{}
 			}
 			if err := m.Target.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipRemoteProtocol(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthRemoteProtocol
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *MessageBatch) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowRemoteProtocol
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: MessageBatch: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: MessageBatch: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Envelopes", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowRemoteProtocol
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthRemoteProtocol
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthRemoteProtocol
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Envelopes = append(m.Envelopes, &MessageEnvelope{})
-			if err := m.Envelopes[len(m.Envelopes)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex

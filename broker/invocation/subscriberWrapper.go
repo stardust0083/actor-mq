@@ -3,7 +3,7 @@ package invocation
 import (
 	"actor-mq/messages"
 
-	"github.com/asynkron/protoactor-go/actor"
+	"actor-mq/actor"
 )
 
 type SubscriberWrapper struct {

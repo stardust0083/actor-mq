@@ -27,3 +27,10 @@ enum Directive{
 message StateMsg{
     States State=1;
 }
+
+message RouterAdd{
+    PID member=1;
+}
+message RouterChange{
+    repeated PID members=1;
+}

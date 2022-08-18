@@ -32,10 +32,9 @@ func main() {
 	pid := actor.SpawnTemplate(&MyActor{})
 	message := &messages.Echo{Message: "hej", Sender: pid}
 	remoti := actor.NewPID("localhost:8091", "foo")
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 100000; i++ {
 		message.Message = "hej" + fmt.Sprint(i)
 		remoti.SendMsg(message)
 	}
-
 	bufio.NewReader(os.Stdin).ReadString('\n')
 }

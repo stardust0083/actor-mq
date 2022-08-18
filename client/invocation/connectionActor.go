@@ -5,7 +5,7 @@ import (
 
 	"actor-mq/pb"
 
-	"github.com/asynkron/protoactor-go/actor"
+	"actor-mq/actor"
 )
 
 type ConnectionActor struct {

@@ -3,8 +3,9 @@ package main
 import (
 	"actor-mq/broker/invocation"
 
+	"actor-mq/actor"
+
 	console "github.com/asynkron/goconsole"
-	"github.com/asynkron/protoactor-go/actor"
 )
 
 func main() {

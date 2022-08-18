@@ -4,8 +4,8 @@ import (
 	"actor-mq/client/invocation"
 	"actor-mq/utils"
 
-	"github.com/asynkron/protoactor-go/actor"
-	"github.com/asynkron/protoactor-go/remote"
+	"actor-mq/actor"
+	"actor-mq/remote"
 )
 
 var context *actor.RootContext

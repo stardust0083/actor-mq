@@ -1,7 +1,6 @@
 package remote
 
 import (
-	fmt "fmt"
 	"log"
 	"net"
 
@@ -12,7 +11,7 @@ import (
 
 type server struct{}
 
-func (s *server) ReceiveMsg(stream Remote_ReceiveMsgServer) error {
+func (s *server) MsgSendRecv(stream Remote_MsgSendRecvServer) error {
 	for {
 		envelope, err := stream.Recv()
 		if err != nil {
@@ -20,7 +19,6 @@ func (s *server) ReceiveMsg(stream Remote_ReceiveMsgServer) error {
 		}
 		pid := envelope.Target
 		message := UnpackMessage(envelope)
-		fmt.Println(message, pid)
 		pid.SendMsg(message)
 	}
 }

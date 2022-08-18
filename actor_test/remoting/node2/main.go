@@ -5,17 +5,15 @@ import (
 	"actor-mq/actor_test/remoting/messages"
 	"actor-mq/remote"
 	"bufio"
-	"fmt"
 	"os"
 )
 
 type MyActor struct{}
 
 func (*MyActor) Receive(context actor.Context) {
-	fmt.Println(context.Self())
 	switch msg := context.Message().(type) {
 	case *messages.Echo:
-		fmt.Println("send")
+		// fmt.Println("Receive Func", context.Message().(*messages.Echo))
 		msg.Sender.SendMsg(&messages.Response{
 			SomeValue: "result",
 			AnInt:     123,

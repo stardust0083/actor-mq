@@ -7,6 +7,7 @@ import (
 
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 func newEndpointWriter(host string) func() actor.Actor {
@@ -18,13 +19,13 @@ func newEndpointWriter(host string) func() actor.Actor {
 type endpointWriter struct {
 	host   string
 	conn   *grpc.ClientConn
-	stream Remote_ReceiveMsgClient
+	stream Remote_MsgSendRecvClient
 }
 
 func (state *endpointWriter) initialize() {
 	log.Println("Started EndpointWriter for host", state.host)
 	log.Println("Connecting to host", state.host)
-	conn, err := grpc.Dial(state.host, grpc.WithInsecure())
+	conn, err := grpc.Dial(state.host, grpc.WithTransportCredentials(insecure.NewCredentials()))
 
 	if err != nil {
 		log.Fatalf("Failed to connect to host %v: %v", state.host, err)
@@ -33,7 +34,7 @@ func (state *endpointWriter) initialize() {
 	state.conn = conn
 	c := NewRemoteClient(conn)
 	log.Println("Getting stream from host", state.host)
-	stream, err := c.ReceiveMsg(context.Background())
+	stream, err := c.MsgSendRecv(context.Background())
 	if err != nil {
 		log.Fatalf("Failed to get stream from host %v: %v", state.host, err)
 	}

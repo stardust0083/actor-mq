@@ -29,6 +29,6 @@ func spawnChild(props Properties, parent *PID) *PID {
 	ref := NewActorEntity(mailbox)
 	pid := PIDMgr.registerPID(ref)
 	cell.self = pid
-	cell.invokeUserMessage(States_Started)
+	cell.invokeUserMessage(StateMsg{State: Started})
 	return pid
 }

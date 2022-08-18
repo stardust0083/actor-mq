@@ -38,7 +38,7 @@ func (mb *Mailbox) PostUserMessage(message interface{}) {
 }
 
 func (mb *Mailbox) PostSystemMessage(message SystemMessage) {
-	mb.userMailbox <- message
+	mb.systemMailbox <- message
 	mb.schedule()
 }
 

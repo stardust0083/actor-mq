@@ -1,6 +1,7 @@
 package actor
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -128,8 +129,7 @@ type EchoOnStartActor struct{ replyTo *PID }
 func (state *EchoOnStartActor) Receive(context Context) {
 	switch context.Message().(type) {
 	case StateMsg:
-		switch context.Message().(StateMsg).State {
-		case States_Started:
+		if context.Message().(StateMsg).State == Started {
 			state.replyTo.SendMsg(EchoReplyMessage{})
 		}
 	}
@@ -156,9 +156,11 @@ type EchoOnStoppingActor struct{ replyTo *PID }
 func (state *EchoOnStoppingActor) Receive(context Context) {
 	switch context.Message().(type) {
 	case StateMsg:
-		switch context.Message().(StateMsg).State {
-		case States_Stopping:
+		if context.Message().(StateMsg).State == Stopping {
 			state.replyTo.SendMsg(EchoReplyMessage{})
+		}
+		if context.Message().(StateMsg).State == Started {
+			fmt.Println("Started")
 		}
 	}
 }
@@ -232,13 +234,11 @@ func (state *CreateChildThenStopActor) Receive(context Context) {
 		msg.ReplyDirectly.SendMsg(true)
 		state.replyTo = msg.ReplyAfterStop
 	case StateMsg:
-		switch context.Message().(StateMsg).State {
-		case States_Stopped:
+		if context.Message().(StateMsg).State == Stopped {
 			reply := GetChildCountReplyMessage{ChildCount: len(context.Children())}
 			state.replyTo.SendMsg(reply)
 		}
 	}
-
 }
 
 func NewCreateChildThenStopActor() Actor {

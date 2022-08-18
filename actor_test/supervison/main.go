@@ -25,20 +25,19 @@ func NewParentActor() actor.Actor {
 type ChildActor struct{}
 
 func (state *ChildActor) Receive(context actor.Context) {
-	msg, ok := context.Message().(actor.States)
-	if ok {
-		switch msg {
-		case actor.States_Started:
+	switch msg := context.Message().(type) {
+	case actor.StateMsg:
+		switch msg.State {
+		case actor.Started:
 			fmt.Println("Starting, initialize actor here")
-		case actor.States_Stopping:
+		case actor.Stopping:
 			fmt.Println("Stopping, actor is about shut down")
-		case actor.States_Stopped:
+		case actor.Stopped:
 			fmt.Println("Stopped, actor and it's children are stopped")
-		case actor.States_Restarting:
+		case actor.Restarting:
 			fmt.Println("Restarting, actor is about restart")
 		}
-	} else {
-		msg := context.Message().(Hello)
+	case Hello:
 		fmt.Printf("Hello %v\n", msg.Who)
 		panic("Ouch")
 	}
@@ -51,7 +50,7 @@ func NewChildActor() actor.Actor {
 func main() {
 	decider := func(child *actor.PID, reason interface{}) actor.Directive {
 		fmt.Println("handling failure for child")
-		return actor.Directive_StopDirective
+		return actor.StopDirective
 	}
 	supervisor := actor.NewDefaultStrategy(10, 1000, decider)
 	pid := actor.Spawn(actor.Props(NewParentActor).WithSupervisor(supervisor))

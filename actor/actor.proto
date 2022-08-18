@@ -1,6 +1,6 @@
 syntax = "proto3";
 package actor;
-option go_package = "../actor";
+// option go_package = "./actor";
 
 message PID {
   string Host = 1;

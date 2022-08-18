@@ -25,7 +25,7 @@ func NewDefaultStrategy(maxNrOfRetries int, withinTimeRangeMilliseconds int, dec
 }
 
 func DefaultDecider(child *PID, reason interface{}) Directive {
-	return Directive_RestartDirective
+	return RestartDirective
 }
 
 func DefaultSupervisionStrategy() SupervisionStrategy {

@@ -106,7 +106,7 @@ func (cell *ActorCell) invokeSystemMessage(message SystemMessage) {
 
 func (cell *ActorCell) handleStop(msg *stop) {
 	cell.stopping = true
-	cell.invokeUserMessage(StateMsg{State: States_Stopping})
+	cell.invokeUserMessage(StateMsg{State: Stopping})
 	for child := range cell.children {
 		child.(*PID).Stop()
 	}
@@ -122,16 +122,16 @@ func (cell *ActorCell) handleOtherStopped(msg *otherStopped) {
 func (cell *ActorCell) handleFailure(msg *failure) {
 	directive := cell.supervisor.Handle(msg.Who, msg.Reason)
 	switch directive {
-	case Directive_ResumeDirective:
+	case ResumeDirective:
 		//resume the fialing child
 		msg.Who.SendCtrlMsg(&resume{})
-	case Directive_RestartDirective:
+	case RestartDirective:
 		//restart the failing child
 		msg.Who.SendCtrlMsg(&restart{})
-	case Directive_StopDirective:
+	case StopDirective:
 		//stop the failing child
 		msg.Who.Stop()
-	case Directive_EscalateDirective:
+	case EscalateDirective:
 		//send failure to parent
 		cell.parent.SendCtrlMsg(msg)
 	}
@@ -139,7 +139,7 @@ func (cell *ActorCell) handleFailure(msg *failure) {
 
 func (cell *ActorCell) handleRestart(msg *restart) {
 	cell.stopping = false
-	cell.invokeUserMessage(StateMsg{State: States_Restarting}) //TODO: change to restarting
+	cell.invokeUserMessage(StateMsg{State: Restarting}) //TODO: change to restarting
 	for child := range cell.children {
 		child.(*PID).Stop()
 	}
@@ -159,12 +159,12 @@ func (cell *ActorCell) tryRestartOrTerminate() {
 
 func (cell *ActorCell) restart() {
 	cell.incarnateActor()
-	cell.invokeUserMessage(StateMsg{State: States_Started})
+	cell.invokeUserMessage(StateMsg{State: Started})
 }
 
 func (cell *ActorCell) stopped() {
 	PIDMgr.unregisterPID(cell.self)
-	cell.invokeUserMessage(StateMsg{State: States_Stopped})
+	cell.invokeUserMessage(StateMsg{State: Stopped})
 	otherStopped := &otherStopped{Who: cell.self}
 	for watcher := range cell.watchers {
 		watcher.(*PID).SendCtrlMsg(otherStopped)
@@ -251,16 +251,16 @@ func (cell *ActorCell) SpawnFunc(producer func() Actor) *PID {
 func handleRootFailure(msg *failure, supervisor SupervisionStrategy) {
 	directive := supervisor.Handle(msg.Who, msg.Reason)
 	switch directive {
-	case Directive_ResumeDirective:
+	case ResumeDirective:
 		//resume the fialing child
 		msg.Who.SendCtrlMsg(&resume{})
-	case Directive_RestartDirective:
+	case RestartDirective:
 		//restart the failing child
 		msg.Who.SendCtrlMsg(&restart{})
-	case Directive_StopDirective:
+	case StopDirective:
 		//stop the failing child
 		msg.Who.Stop()
-	case Directive_EscalateDirective:
+	case EscalateDirective:
 		//send failure to parent
 		panic("Can not escalate root level failures")
 	}

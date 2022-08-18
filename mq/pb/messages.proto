@@ -1,0 +1,33 @@
+syntax = "proto3";
+package pb;
+import "actor-mq/actor/actor.proto";
+
+
+message CreateRouterMsg{
+    string ChannelName = 1;
+    actor.PID Sender=2;
+}
+message CreateRouterRespMsg{
+    string ChannelName = 1;
+    bool ACK=3;
+}
+
+message SubscribeMsg{
+    string ChannelName = 1;
+    actor.PID Subscriber = 2;
+}
+
+message UnsubscribeMsg{
+    string ChannelName = 1;
+    actor.PID Subscriber = 2;
+}
+
+message SyncRouterMsg{
+    repeated actor.PID Router=1;
+}
+
+message CommonMsg{
+    actor.PID Sender=1;
+    actor.PID Target = 2;
+    repeated bytes msg=3;
+}

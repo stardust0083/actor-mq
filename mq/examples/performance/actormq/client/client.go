@@ -32,9 +32,9 @@ func main() {
 	actor.PIDMgr.Register("usr2", usr2)
 	usr3 := cli.NewUser()
 	actor.PIDMgr.Register("usr3", usr3)
-	cli.BindUsertoRouter(usr2, actor.NewPID("localhost:8090", "encrypt"), "encrypt")
-	cli.BindUsertoRouter(usr3, actor.NewPID("localhost:8090", "encrypt"), "encrypt")
-	cli.BindUsertoRouter(usr3, actor.NewPID("localhost:8090", "encrypted"), "encrypted")
+	cli.BindUsertoRouter(usr2, actor.NewPID("localhost:8090", "encrypt"))
+	cli.BindUsertoRouter(usr3, actor.NewPID("localhost:8090", "encrypt"))
+	cli.BindUsertoRouter(usr3, actor.NewPID("localhost:8090", "encrypted"))
 
 	// var initialTime time.Time
 

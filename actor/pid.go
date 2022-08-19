@@ -1,7 +1,6 @@
 package actor
 
 import (
-	fmt "fmt"
 	"strings"
 )
 
@@ -11,7 +10,6 @@ func (pid *PID) SendMsg(message interface{}) {
 }
 
 func SendMsg(pid *PID, message interface{}) {
-	fmt.Println(pid, message)
 	ref, _ := PIDMgr.fromPID(pid)
 	ref.SendMsg(message)
 }

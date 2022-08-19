@@ -12,7 +12,6 @@ type routerMgr struct {
 }
 
 func (r *routerMgr) Receive(context actor.Context) {
-	fmt.Println(context.Message())
 	switch msg := context.Message().(type) {
 	case *pb.SyncRouterMsg:
 		r.RouterList = msg.Router
@@ -24,11 +23,10 @@ type CliUser struct {
 }
 
 func (r *CliUser) Receive(context actor.Context) {
-	fmt.Println(context.Message())
 	switch msg := context.Message().(type) {
 	case *actor.StateMsg:
 	default:
-		fmt.Println(msg)
+		fmt.Println("Received", context.Self(), msg)
 	}
 }
 func StartClient(host string, port string) {
@@ -42,10 +40,9 @@ func NewUser() *actor.PID {
 	return pid
 }
 
-func BindUsertoRouter(localactor *actor.PID, router *actor.PID, channelName string) {
-	router.SendMsg(&pb.SubscribeMsg{
-		ChannelName: channelName,
-		Subscriber:  localactor,
+func BindUsertoRouter(localactor *actor.PID, router *actor.PID) {
+	router.SendMsg(&actor.RouterAdd{
+		Member: localactor,
 	})
 }
 

@@ -70,4 +70,8 @@ func (pr *PIDMgrStruct) fromPID(pid *PID) (ActorRef, bool) {
 func (pr *PIDMgrStruct) Register(name string, pid *PID) {
 	ref, _ := pr.fromPID(pid)
 	pr.LocalPids[name] = ref
+	// fmt.Println("Register Success:")
+	// for k, v := range pr.LocalPids {
+	// 	fmt.Println("\t", k, v)
+	// }
 }

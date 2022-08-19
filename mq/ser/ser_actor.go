@@ -12,7 +12,6 @@ type routerMgr struct {
 }
 
 func (r *routerMgr) Receive(context actor.Context) {
-	fmt.Println(context.Message())
 	switch msg := context.Message().(type) {
 	case *pb.CreateRouterMsg:
 		if _, ok := actor.PIDMgr.LocalPids[msg.ChannelName]; ok {
@@ -39,7 +38,7 @@ func (r *routerMgr) Receive(context actor.Context) {
 	}
 }
 
-var hostManager = actor.SpawnTemplate(&hostMgr{HostList: make(map[string]struct{})})
+var hostManager *actor.PID
 
 type hostMgr struct {
 	HostList map[string]struct{}
@@ -49,7 +48,6 @@ type newHostMsg struct {
 }
 
 func (r *hostMgr) Receive(context actor.Context) {
-	fmt.Println(context.Message())
 	switch msg := context.Message().(type) {
 	case newHostMsg:
 		if _, ok := r.HostList[msg.host]; !ok {
@@ -70,6 +68,7 @@ func (r *hostMgr) Receive(context actor.Context) {
 
 func StartServer(host string, port string) {
 	remote.StartServer(fmt.Sprintf("%s:%s", host, port))
+	hostManager = actor.SpawnTemplate(&hostMgr{HostList: make(map[string]struct{})})
 	actor.PIDMgr.Register("ConnManager", hostManager)
 	pidrm := actor.SpawnTemplate(&routerMgr{RouterList: make([]*actor.PID, 0)})
 	actor.PIDMgr.Register("RouterManager", pidrm)

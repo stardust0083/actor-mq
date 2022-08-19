@@ -29,5 +29,8 @@ message SyncRouterMsg{
 message CommonMsg{
     actor.PID Sender=1;
     actor.PID Target = 2;
-    repeated bytes msg=3;
+    string msg=3;
+}
+message SyncCommand {
+	repeated actor.PID RouterList=1;
 }

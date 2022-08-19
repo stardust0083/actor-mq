@@ -12,6 +12,7 @@ type routerMgr struct {
 }
 
 func (r *routerMgr) Receive(context actor.Context) {
+	fmt.Println(context.Message())
 	switch msg := context.Message().(type) {
 	case *pb.CreateRouterMsg:
 		if _, ok := actor.PIDMgr.LocalPids[msg.ChannelName]; ok {
@@ -29,7 +30,7 @@ func (r *routerMgr) Receive(context actor.Context) {
 				ACK:         true,
 			})
 			hostManager.SendMsg(
-				&syncCommand{
+				&pb.SyncCommand{
 					RouterList: r.RouterList,
 				})
 
@@ -46,18 +47,16 @@ type hostMgr struct {
 type newHostMsg struct {
 	host string
 }
-type syncCommand struct {
-	RouterList []*actor.PID
-}
 
 func (r *hostMgr) Receive(context actor.Context) {
+	fmt.Println(context.Message())
 	switch msg := context.Message().(type) {
 	case newHostMsg:
 		if _, ok := r.HostList[msg.host]; !ok {
 			fmt.Println("New Connection " + msg.host)
 			r.HostList[msg.host] = struct{}{}
 		}
-	case syncCommand:
+	case pb.SyncCommand:
 		for k := range r.HostList {
 			tmppid := actor.NewPID(k, "RouterManager")
 			tmppid.SendMsg(

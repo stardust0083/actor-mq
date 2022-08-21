@@ -66,7 +66,7 @@ func main() {
 			false,     // immediate
 			amqp.Publishing{
 				ContentType: "text/plain",
-				Body:        []byte("Hello World!"),
+				Body:        []byte(fmt.Sprint(i)),
 			})
 		failOnError(err, "Failed to publish a message")
 

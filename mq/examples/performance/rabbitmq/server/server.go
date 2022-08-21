@@ -74,7 +74,7 @@ func main() {
 				false,           // immediate
 				amqp.Publishing{
 					ContentType: "text/plain",
-					Body:        []byte(getMd5Hash(string(d.Body))),
+					Body:        d.Body,
 				})
 		}
 	}()

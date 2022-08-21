@@ -3,7 +3,7 @@ package main
 import (
 	"actor-mq/actor"
 	"actor-mq/mq/cli"
-	"actor-mq/mq/pb"
+	"fmt"
 
 	console "github.com/asynkron/goconsole"
 )
@@ -40,17 +40,13 @@ func main() {
 
 	for i := 0; i < NumberRequests; i++ {
 		// initialTime = time.Now()
-
-		actor.NewPID("localhost:8090", "encrypt").SendMsg(&pb.CommonMsg{
-			Sender: usr2,
-			Target: actor.NewPID("localhost:8090", "encrypt"),
-			Msg:    "Hello",
-		})
+		cli.WriteTo(actor.NewPID("localhost:8090", "encrypt"), fmt.Sprint(i))
 
 		// if _, err := file.WriteString(fmt.Sprintf("%d\n", time.Since(initialTime).Nanoseconds())); err != nil {
 		// 	log.Println(err)
 		// }
 
 	}
+	cli.CloseFile()
 	console.ReadLine()
 }

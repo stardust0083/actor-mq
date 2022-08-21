@@ -5,7 +5,7 @@ import (
 	"sync/atomic"
 )
 
-const chanmaxlen = 100
+const chanmaxlen = 10000
 const (
 	MailboxIdle    int32 = 0
 	MailboxRunning int32 = 1

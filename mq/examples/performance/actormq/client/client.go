@@ -4,6 +4,7 @@ import (
 	"actor-mq/actor"
 	"actor-mq/mq/cli"
 	"fmt"
+	"time"
 
 	console "github.com/asynkron/goconsole"
 )
@@ -20,7 +21,7 @@ import (
 // }
 
 func main() {
-	const NumberRequests = 5000
+	const NumberRequests = 10000
 
 	// file := openFile(fmt.Sprintf("responseTime%d", NumberRequests))
 	// defer file.Close()
@@ -34,13 +35,16 @@ func main() {
 	actor.PIDMgr.Register("usr3", usr3)
 	cli.BindUsertoRouter(usr2, actor.NewPID("localhost:8090", "encrypt"))
 	cli.BindUsertoRouter(usr3, actor.NewPID("localhost:8090", "encrypt"))
-	cli.BindUsertoRouter(usr3, actor.NewPID("localhost:8090", "encrypted"))
+	cli.BindUsertoRouter(usr1, actor.NewPID("localhost:8090", "encrypted"))
 
 	// var initialTime time.Time
-
+	t1 := time.Now()
 	for i := 0; i < NumberRequests; i++ {
 		// initialTime = time.Now()
-		cli.WriteTo(actor.NewPID("localhost:8090", "encrypt"), fmt.Sprint(i))
+		time.Sleep(time.Nanosecond * 100)
+		cli.WriteTo(actor.NewPID("localhost:8090", "encrypted"), fmt.Sprint(i))
+		fmt.Println(time.Since(t1))
+		t1 = time.Now()
 
 		// if _, err := file.WriteString(fmt.Sprintf("%d\n", time.Since(initialTime).Nanoseconds())); err != nil {
 		// 	log.Println(err)

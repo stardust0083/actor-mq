@@ -27,7 +27,7 @@ func failOnError(err error, msg string) {
 }
 
 func main() {
-	const NumberRequests = 5000
+	const NumberRequests = 100000
 
 	file := openFile(fmt.Sprintf("responseTime%d", NumberRequests))
 	defer file.Close()

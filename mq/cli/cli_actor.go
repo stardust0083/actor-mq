@@ -12,7 +12,7 @@ import (
 var f *os.File
 
 func init() {
-	f, _ = os.OpenFile("respondtime.csv", os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
+	f, _ = os.OpenFile("respondtime.csv", os.O_CREATE|os.O_TRUNC|os.O_RDWR, 0666)
 }
 
 type routerMgr struct {
@@ -35,9 +35,10 @@ func (r *CliUser) Receive(context actor.Context) {
 	switch msg := context.Message().(type) {
 	case *actor.StateMsg:
 	case *pb.CommonMsg:
-		t1, _ := time.Parse("2006-01-02 15:04:05.999999999 -0700 MST", msg.String())
-		fmt.Fprintln(f, time.Since(t1).Nanoseconds())
-		fmt.Println("Receive", msg.Msg)
+		t1, _ := time.Parse(`2006-01-02T15:04:05.000000000`, msg.Time)
+
+		fmt.Fprintln(f, time.Since(t1.Add(-time.Hour*8)).Nanoseconds())
+		fmt.Println("Receive", msg.Msg, time.Since(t1.Add(-time.Hour*8)))
 	default:
 		// fmt.Println(msg, time.Now())
 	}
@@ -60,11 +61,10 @@ func BindUsertoRouter(localactor *actor.PID, router *actor.PID) {
 }
 
 func WriteTo(target *actor.PID, msg string) {
-	fmt.Println("Send", msg)
 	target.SendMsg(&pb.CommonMsg{
 		Msg:    msg,
 		Target: target,
-		Time:   time.Now().String(),
+		Time:   time.Now().Format(`2006-01-02T15:04:05.000000000`),
 	})
 }
 
